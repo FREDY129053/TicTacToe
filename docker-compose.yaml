@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16
+    container_name: main_db
+    environment:
+      POSTGRES_DB: tic_tac_toe_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - ./backend/ttt_dump.sql:/docker-entrypoint-initdb.d/ttt_dump.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge
