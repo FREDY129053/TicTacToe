@@ -1,9 +1,13 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from tortoise.exceptions import DoesNotExist, OperationalError
 
 from backend.api.src.db.models import User, UserStats
+
+
+async def get_all_users() -> List[User]:
+    return await User.all()
 
 
 async def get_user(uuid: UUID) -> Optional[User]:

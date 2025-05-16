@@ -24,3 +24,8 @@ async def user_enter(username: str, password: str) -> ServiceMessage:
             return ServiceMessage(
                 is_error=True, message="wrong password", status_code=400
             )
+
+
+async def get_users() -> ServiceMessage:
+    users = await UserRepo.get_all_users()
+    return ServiceMessage(message=users, status_code=200)

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
+from typing import List
 import backend.api.src.services.user as UserService
-from backend.api.src.schemas import UserEnter
+from backend.api.src.schemas import UserEnter, FullUser
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -17,3 +18,10 @@ async def login_user(user_data: UserEnter):
     return JSONResponse(
         content={"message": message.message}, status_code=message.status_code
     )
+
+
+@user_router.get("", response_model=List[FullUser])
+async def get_all_users():
+    message = await UserService.get_users()
+
+    return message.message
