@@ -113,6 +113,25 @@ CREATE TABLE public.user_stats (
 
 ALTER TABLE public.user_stats OWNER TO postgres;
 
+CREATE SEQUENCE public.user_stats_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.user_stats_id_seq OWNER TO postgres;
+
+--
+-- Name: user_company_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_stats_id_seq OWNED BY public.user_stats.id;
+
+ALTER TABLE ONLY public.user_stats ALTER COLUMN id SET DEFAULT nextval('public.user_stats_id_seq'::regclass);
+
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --

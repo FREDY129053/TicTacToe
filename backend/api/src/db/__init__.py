@@ -6,7 +6,7 @@ TORTOISE_ORM = {
     "connections": {"default": "postgres://postgres:12345@localhost:5433/tic_tac_toe_db"},
     "apps": {
         "models": {
-            "models": ["api.src.db.models", "aerich.models"],
+            "models": ["backend.api.src.db.models"],
             "default_connection": "default",
         }
     },

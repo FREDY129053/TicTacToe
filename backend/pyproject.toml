@@ -1,4 +1,0 @@
-[tool.aerich]
-tortoise_orm = "api.src.db.TORTOISE_ORM"
-location = "./api/migrations"
-src_folder = "./."

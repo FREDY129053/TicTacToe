@@ -1,12 +1,6 @@
 from tortoise import fields
 from tortoise.models import Model
-from enum import StrEnum
-
-
-class Result(StrEnum):
-    WIN = "win"
-    LOSE = "lose"
-    DRAW = "draw"
+from backend.api.src.enums import Result
 
 
 class GameResult(Model):

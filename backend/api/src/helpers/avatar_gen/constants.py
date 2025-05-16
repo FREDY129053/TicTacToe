@@ -1,0 +1,5 @@
+from math import ceil
+
+BACKGROUND_COLOR = 250, 251, 253
+RAW_IMAGE_SIZE = 5
+RAW_IMAGE_HALF_SIZE = int(ceil(RAW_IMAGE_SIZE / 2))

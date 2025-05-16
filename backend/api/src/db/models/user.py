@@ -23,6 +23,7 @@ class User(Model):
 
 
 class UserStats(Model):
+    id = fields.IntField(pk=True)
     user = fields.OneToOneField("models.User", related_name="stats")
     games_played = fields.IntField(default=0)
     wins = fields.IntField(default=0)

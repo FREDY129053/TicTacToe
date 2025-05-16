@@ -5,6 +5,7 @@ from typing import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from backend.api.src.db import init_db_tortoise
+from backend.api.src.api_main.routers import router
 
 
 # Это инициализирует БД до запуска приложения(параметр lifespan)
@@ -28,6 +29,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    _app.include_router(router=router)
 
     return _app
 
