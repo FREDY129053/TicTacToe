@@ -24,7 +24,6 @@ CREATE FUNCTION public.delete_room_if_empty() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  -- Если больше нет участников в комнате, удаляем её
   IF NOT EXISTS (
     SELECT 1 FROM room_members WHERE room_id = OLD.room_id
   ) THEN
@@ -156,6 +155,16 @@ CREATE SEQUENCE public.user_stats_id_seq
 
 
 ALTER SEQUENCE public.user_stats_id_seq OWNER TO postgres;
+
+CREATE OR REPLACE FUNCTION public.update_total_games()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.games_played = NEW.wins + NEW.losses + NEW.draws;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+ALTER FUNCTION public.update_total_games() OWNER TO postgres;
 
 --
 -- Name: user_company_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -297,7 +306,10 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE TRIGGER trigger_delete_room_if_empty AFTER DELETE ON public.room_members FOR EACH ROW EXECUTE FUNCTION public.delete_room_if_empty();
-
+CREATE TRIGGER trigger_update_total_games
+BEFORE INSERT OR UPDATE OF wins, losses, draws ON public.user_stats
+FOR EACH ROW
+EXECUTE FUNCTION public.update_total_games();
 
 --
 -- Name: game_results game_results_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres

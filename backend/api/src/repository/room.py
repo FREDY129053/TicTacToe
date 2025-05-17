@@ -37,3 +37,34 @@ async def create_room(uuid: UUID, name: str, is_difficult: bool) -> str:
     _ = await RoomMember.create(room=room, user=user)
 
     return str(room.id)
+
+
+async def is_user_in_room(uuid: UUID, room_uuid: UUID) -> bool:
+    user = await User.get(id=uuid)
+    room = await Room.get(id=room_uuid)
+    is_in_room = await RoomMember.get_or_none(user=user, room=room)
+
+    if is_in_room is None:
+        return False
+    return True
+
+
+async def add_user_at_room(uuid: UUID, room_uuid: UUID) -> RoomMember:
+    user = await User.get(id=uuid)
+    room = await Room.get(id=room_uuid)
+    room_member = await RoomMember.create(user=user, room=room)
+
+    return room_member
+
+
+async def delete_user_from_room(uuid: UUID, room_uuid: UUID) -> bool:
+    user = await User.get(id=uuid)
+    room = await Room.get(id=room_uuid)
+    room_member = await RoomMember.get(user=user, room=room)
+    _ = await room_member.delete()
+
+    return True
+
+
+async def get_all_rooms_and_members() -> List[RoomMember]:
+    return await RoomMember.all()

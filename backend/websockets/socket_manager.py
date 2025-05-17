@@ -2,8 +2,10 @@ import asyncio
 import time
 from typing import Dict, List, Set
 
-import requests
+import httpx
 from fastapi import WebSocket
+
+API_BASE_URL = "http://localhost:8080/api/rooms"
 
 
 class ConnectionManager:
@@ -24,32 +26,35 @@ class ConnectionManager:
         self.clientConnections[user_id] = websocket
         self.is_difficult = difficult
 
+        if not await self._is_user_in_room(user_id, room_id):
+            await self._add_user_to_room(user_id, room_id)
+
         await self._match_clients(user_id, room_id)
 
-    def disconnect(self, user_id: str):
+    async def disconnect(self, user_id: str):
         if user_id in self.clientConnections:
             del self.clientConnections[user_id]
             self.last_disconnect_time[user_id] = time.time()
 
             opponent_id = self.opponents.get(user_id)
             if opponent_id and opponent_id in self.clientConnections:
-                message = {
-                    "method": "left",
-                    "message": "Противник съебал",
-                }
-
-                try:
-                    ws = self.clientConnections[opponent_id]
-                    asyncio.create_task(ws.send_json(message))
-                except Exception as error:
-                    print(f"[WARNING] Error notify opponent: {error}")
+                asyncio.create_task(
+                    self.clientConnections[opponent_id].send_json(
+                        {
+                            "method": "left",
+                            "message": "Противник съебал",
+                        }
+                    )
+                )
 
             self.opponents.pop(user_id, None)
             self.opponents.pop(opponent_id, None)  # type: ignore
-
+            print(f"{user_id}\n{self.rooms.items()}")
             for room_id, room in self.rooms.items():
                 if user_id in room:
                     room.remove(user_id)
+                    print(f"Need delete\n{room_id} | {user_id}")
+                    asyncio.create_task(self._remove_user_from_room(user_id, room_id))
 
     async def _match_clients(self, user_id: str, room_id: str):
         if room_id not in self.rooms:
@@ -59,8 +64,8 @@ class ConnectionManager:
         if len(self.rooms[room_id]) < 2:
             return
 
-        player_2 = self.rooms[room_id].pop()
-        player_1 = self.rooms[room_id].pop()
+        player_2 = self.rooms[room_id][-1]
+        player_1 = self.rooms[room_id][-2]
 
         self.opponents[player_1] = player_2
         self.opponents[player_2] = player_1
@@ -73,7 +78,6 @@ class ConnectionManager:
                 "turn": "X",
             },
         )
-
         await self._send(
             player_2,
             {
@@ -87,6 +91,42 @@ class ConnectionManager:
         ws = self.clientConnections.get(user_id)
         if ws:
             await ws.send_json(message)
+
+    async def _is_user_in_room(self, user_id: str, room_id: str) -> bool:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{API_BASE_URL}/is_in_room",
+                    params={"user_uuid": user_id, "room_uuid": room_id},
+                )
+                response.raise_for_status()
+                return response.json()["result"] is True
+        except Exception as e:
+            print(f"[ERROR] Проверка is_in_room не удалась: {e}")
+            return False
+
+    async def _add_user_to_room(self, user_id: str, room_id: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{API_BASE_URL}/add_member",
+                    json={"user_uuid": user_id, "room_uuid": room_id},
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось добавить пользователя в комнату: {e}")
+
+    async def _remove_user_from_room(self, user_id: str, room_id: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.delete(
+                    f"{API_BASE_URL}/delete_member",
+                    params={"user_uuid": user_id, "room_uuid": room_id},
+                )
+                print(f"RESP = {response.status_code}")
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось удалить пользователя из комнаты: {e}")
 
     async def handle_restart(self, user_id: str, room_id: str):
         if room_id not in self.restart_votes:

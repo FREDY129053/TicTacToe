@@ -4,21 +4,15 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Game() {
-  // Системные вещи о комнате и пользователе
-  // const userUUID = decodeJWT(localStorage.getItem("token"));
   const router = useRouter();
-  const { uuid, is_hard } = router.query;
-  const isDifficult = is_hard === "true" ? true : false;
-
-  // Переменные сокетов
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  // Переменные игры
-  const [message, setMessage] = useState<string>("searching...");
+  const [message, setMessage] = useState<string>("Поиск соперника...");
   const [field, setField] = useState<string[]>(Array(9).fill(""));
   const [isEndGame, setIsEndGame] = useState<boolean>(false);
   const [isGameActive, setIsGameActive] = useState<boolean>(false);
   const [restartVotes, setRestartVotes] = useState<number>(0);
+
   const symbolRef = useRef<"X" | "O" | "">("");
   const moveQueue = useRef(new Queue());
 
@@ -26,23 +20,17 @@ export default function Game() {
     (index: number) => {
       if (!isGameActive || field[index] !== "") return;
 
-      setIsGameActive(false);
-
       const newField = [...field];
-
-      if (isDifficult) {
-        const queue = moveQueue.current;
-
-        if (queue.size() === 3) {
-          const removeIndex = queue.dequeue();
-          newField[removeIndex] = "";
-        }
-        queue.enqueue(index);
+      if (isDifficult && moveQueue.current.size() === 3) {
+        const removed = moveQueue.current.dequeue();
+        newField[removed] = "";
       }
 
+      moveQueue.current.enqueue(index);
       newField[index] = symbolRef.current;
-
       setField(newField);
+
+      setIsGameActive(false);
 
       socket?.send(
         JSON.stringify({
@@ -52,7 +40,7 @@ export default function Game() {
         })
       );
     },
-    [field, isGameActive, socket, isDifficult]
+    [field, isGameActive, socket]
   );
 
   const makeRestart = () => {
@@ -63,21 +51,41 @@ export default function Game() {
     );
   };
 
+  const [isReady, setIsReady] = useState(false);
+  const [uuid, setUuid] = useState<string | null>(null);
+  const [isDifficult, setIsDifficult] = useState(false);
+
   useEffect(() => {
-    const userUUID = decodeJWT(localStorage.getItem("token"));
+    if (router.isReady) {
+      const u = router.query.uuid as string;
+      const hard = router.query.is_hard === "true";
+      setUuid(u);
+      setIsDifficult(hard);
+      setIsReady(true);
+    }
+  }, [router]);
 
-    if (!userUUID || !uuid || !is_hard) return;
+  useEffect(() => {
+    if (!isReady || !uuid) return;
 
-    const updateBoard = (newField: string[]) => {
-      setField(newField);
-    };
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("Ошибка: токен отсутствует");
+      return;
+    }
+
+    const userUUID = decodeJWT(token);
+    if (!userUUID) {
+      setMessage("Ошибка: не удалось декодировать токен");
+      return;
+    }
 
     const ws = new WebSocket(
-      `ws://127.0.0.1:8000/ws/game/${uuid}?user_id=${userUUID}&is_hard=${is_hard}`
+      `ws://127.0.0.1:8000/ws/game/${uuid}?user_id=${userUUID}&is_hard=${isDifficult}`
     );
 
     ws.onopen = () => {
-      console.log("Connected to WebSocket server");
+      console.log("✅ WebSocket соединение установлено");
     };
 
     ws.onmessage = (event) => {
@@ -102,14 +110,11 @@ export default function Game() {
               ? "Ваш ход"
               : "Ожидаем соперника..."
           );
-          updateBoard(response.field);
           break;
 
         case "result":
           setField(response.field);
           setIsGameActive(false);
-          updateBoard(response.field);
-
           setTimeout(() => {
             setMessage(response.message);
             setIsEndGame(true);
@@ -134,11 +139,18 @@ export default function Game() {
           setIsEndGame(false);
           setMessage(response.message);
           break;
+
+        default:
+          console.warn("Неизвестный метод:", response);
       }
     };
 
-    ws.onclose = () => {
-      console.log("Disconnected from WebSocket server");
+    ws.onclose = (e) => {
+      console.warn("❌ WebSocket отключён", e.code, e.reason);
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket ошибка", err);
     };
 
     setSocket(ws);
@@ -146,7 +158,7 @@ export default function Game() {
     return () => {
       ws.close();
     };
-  }, [is_hard, uuid]);
+  }, [isReady, uuid, isDifficult]);
 
   return (
     <GameRoom
@@ -161,28 +173,17 @@ export default function Game() {
 }
 
 class Queue {
-  items: number[];
-  constructor() {
-    this.items = [];
-  }
+  items: number[] = [];
 
-  enqueue(element: number) {
-    this.items.push(element);
+  enqueue(item: number) {
+    this.items.push(item);
   }
 
   dequeue(): number {
-    return this.isEmpty() ? -1 : this.items.shift()!;
+    return this.items.length === 0 ? -1 : this.items.shift()!;
   }
 
-  isEmpty() {
-    return this.items.length === 0;
-  }
-
-  size() {
+  size(): number {
     return this.items.length;
-  }
-
-  print() {
-    console.log(this.items.join(" -> "));
   }
 }
