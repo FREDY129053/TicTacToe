@@ -1,14 +1,41 @@
+import axios from "axios";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 export const LoginModal = ({ onClose }) => {
-  const router = useRouter()
+  const router = useRouter();
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    router.push('/main')
-  }
+    axios
+      .post(
+        "http://localhost:8080/api/users/login",
+        {
+          username: username,
+          password: password,
+        },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        },
+      )
+      .then((response) => {
+        localStorage.setItem('token', response.data.token)
+        router.push("/main");
+      })
+      .catch((error) => {
+        console.error(
+          "Ошибка:",
+          error.response ? error.response.data : error.message
+        );
+      });
+  };
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -23,11 +50,15 @@ export const LoginModal = ({ onClose }) => {
           <input
             type="text"
             placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="bg-white/10 border border-[#cfd2ff] text-white placeholder-[#cfd2ff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffce00]"
           />
           <input
             type="password"
             placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="bg-white/10 border border-[#cfd2ff] text-white placeholder-[#cfd2ff] px-4 py-2 rounded-lg focus:outline-none focus:border-[#ffce00]"
           />
           <button

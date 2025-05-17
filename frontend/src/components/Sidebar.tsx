@@ -3,9 +3,16 @@ import { BsArrowLeftShort, BsPerson } from "react-icons/bs";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaRobot } from "react-icons/fa";
 import Image from "next/image";
+import Loading from "./Loading";
 
-export default function Sidebar() {
-  const [open, setOpen] = useState<boolean>(false);
+export default function Sidebar({
+  username,
+  avatar,
+}: {
+  username: string | undefined;
+  avatar: string | undefined;
+}) {
+  const [open, setOpen] = useState<boolean>(true);
 
   const Menus = [
     {
@@ -15,7 +22,11 @@ export default function Sidebar() {
       hover: "hover:bg-light-white",
     },
     { title: "Игра с ботом", icon: <FaRobot />, hover: "hover:bg-light-white" },
-    { title: "Выход", icon: <AiOutlineLogout />, hover: "hover:bg-red-400 hover:text-white" },
+    {
+      title: "Выход",
+      icon: <AiOutlineLogout />,
+      hover: "hover:bg-red-400 hover:text-white",
+    },
   ];
 
   return (
@@ -32,23 +43,33 @@ export default function Sidebar() {
       />
 
       <div className="flex flex-col gap-4 items-center justify-center">
-        <Image
-          className={`${
-            open && "w-16 h-16"
-          } rounded-xl border-2 border-[#ffce00]`}
-          src={"https://i.ibb.co/vvTcSJr7/0df72d147985.png"}
-          width={100}
-          height={100}
-          alt="Avatar"
-        />
-        <p className={`${!open && "hidden"} text-white font-semibold`}>fredy</p>
+        {avatar && username ? (
+          <>
+            <Image
+              className={`${
+                open && "w-16 h-16"
+              } rounded-xl border-2 border-[#ffce00]`}
+              src={avatar}
+              width={100}
+              height={100}
+              alt="Avatar"
+            />
+            <p className={`${!open && "hidden"} text-white font-semibold`}>
+              {username}
+            </p>
+          </>
+        ) : (
+          <Loading variant="dots" />
+        )}
       </div>
 
       <ul className="pt-2">
         {Menus.map((menu, index) => (
           <React.Fragment key={index}>
             <li
-              className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${menu.hover} rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
+              className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${
+                menu.hover
+              } rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
             >
               <span className="text-2xl block float-left">{menu.icon} </span>
               <span

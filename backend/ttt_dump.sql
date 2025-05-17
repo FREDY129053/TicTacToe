@@ -46,6 +46,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.game_results (
+    id integer NOT NULL,
     game_id uuid NOT NULL,
     user_id uuid NOT NULL,
     opponent_id uuid,
@@ -55,6 +56,21 @@ CREATE TABLE public.game_results (
 
 
 ALTER TABLE public.game_results OWNER TO postgres;
+
+CREATE SEQUENCE public.game_results_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.game_results_id_seq OWNER TO postgres;
+
+ALTER SEQUENCE public.game_results_id_seq OWNED BY public.game_results.id;
+
+ALTER TABLE ONLY public.game_results ALTER COLUMN id SET DEFAULT nextval('public.game_results_id_seq'::regclass);
 
 --
 -- Name: games; Type: TABLE; Schema: public; Owner: postgres
@@ -76,6 +92,7 @@ ALTER TABLE public.games OWNER TO postgres;
 --
 
 CREATE TABLE public.room_members (
+    id integer NOT NULL,
     room_id uuid NOT NULL,
     user_id uuid NOT NULL,
     joined_at timestamp with time zone DEFAULT now()
@@ -83,6 +100,21 @@ CREATE TABLE public.room_members (
 
 
 ALTER TABLE public.room_members OWNER TO postgres;
+
+CREATE SEQUENCE public.room_members_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.room_members_id_seq OWNER TO postgres;
+
+ALTER SEQUENCE public.room_members_id_seq OWNED BY public.room_members.id;
+
+ALTER TABLE ONLY public.room_members ALTER COLUMN id SET DEFAULT nextval('public.room_members_id_seq'::regclass);
 
 --
 -- Name: rooms; Type: TABLE; Schema: public; Owner: postgres

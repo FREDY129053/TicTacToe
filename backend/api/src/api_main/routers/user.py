@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from typing import List
+from uuid import UUID
 import backend.api.src.services.user as UserService
 from backend.api.src.schemas import UserEnter, FullUser
 
@@ -15,13 +16,27 @@ async def login_user(user_data: UserEnter):
     if message.is_error:
         raise HTTPException(status_code=message.status_code, detail=message.message)
 
-    return JSONResponse(
-        content={"message": message.message}, status_code=message.status_code
+    response = JSONResponse(
+        content={"token": message.message}, status_code=message.status_code
     )
+
+    response.set_cookie("user", str(message.message), httponly=True)
+
+    return response
 
 
 @user_router.get("", response_model=List[FullUser])
 async def get_all_users():
     message = await UserService.get_users()
+
+    return message.message
+
+
+@user_router.get("/{uuid}", response_model=FullUser)
+async def get_user(uuid: UUID):
+    message = await UserService.get_user_by_uuid(uuid=uuid)
+
+    if message.is_error:
+        raise HTTPException(status_code=message.status_code, detail=message.message)
 
     return message.message
