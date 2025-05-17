@@ -1,8 +1,8 @@
 export interface IRoom {
   uuid: string
   name: string
-  isHard: boolean
-  membersIn: number
-  memberUsername: string
-  memberAvatar: string
+  is_difficult: boolean
+  member_count: number
+  host_avatar: string
+  host_username: string
 }

@@ -1,14 +1,53 @@
-import { useEffect } from "react";
+import { decodeJWT } from "@/functions/decodeJWT";
+import axios from "axios";
+import { useRouter } from "next/router";
+import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaTimes } from "react-icons/fa";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; isHard: boolean }) => void;
+  onSubmit: () => void;
 };
 
 export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
+  const [name, setName] = useState("");
+  const [isDifficult, setIsDifficult] = useState(false);
+  const router = useRouter()
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    const uuid = decodeJWT(token);
+    axios
+      .post(
+        "http://localhost:8080/api/rooms",
+        {
+          user_uuid: uuid,
+          name: name,
+          is_difficult: isDifficult
+        },
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      )
+      .then((response) => router.push(`/game/${response.data.uuid}?is_hard=${isDifficult}`))
+      .catch((error) => {
+        console.error(
+          "Ошибка:",
+          error.response ? error.response.data : error.message
+        );
+      });
+    setName('')
+    setIsDifficult(false)
+    onSubmit();
+  };
+
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "auto";
@@ -30,16 +69,7 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
           Создание комнаты
         </h2>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const name = formData.get("name") as string;
-            const isHard = formData.get("isHard") === "on";
-            onSubmit({ name, isHard });
-          }}
-          className="flex flex-col gap-6"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col">
             <label htmlFor="name" className="mb-1 text-sm text-[#cfd2ff]">
               Название комнаты
@@ -47,6 +77,8 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
             <input
               type="text"
               name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               className="bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none text-white placeholder-white/50 focus:ring-2 focus:ring-[#ffce00]"
               placeholder="Например, Комната акулы"
@@ -57,6 +89,8 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
             <input
               type="checkbox"
               id="isHard"
+              checked={isDifficult}
+              onChange={(e) => setIsDifficult(e.target.checked)}
               name="isHard"
               className="absolute opacity-0 w-0 h-0 peer"
             />

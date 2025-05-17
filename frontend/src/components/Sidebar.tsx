@@ -31,7 +31,7 @@ export default function Sidebar({
 
   return (
     <div
-      className={`bg-[rgba(0,0,0,0.3)] h-screen p-5 pt-8 ${
+      className={`bg-[rgba(0,0,0,0.3)] h-screen ${open && "mr-2"} p-5 pt-8 ${
         open ? "w-56" : "w-20"
       } relative duration-300`}
     >

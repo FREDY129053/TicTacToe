@@ -1,6 +1,7 @@
 from typing import Any, List
+from uuid import UUID
 from tortoise.functions import Count
-from backend.api.src.db.models import Room
+from backend.api.src.db.models import Room, RoomMember, User
 
 
 async def get_rooms() -> List[Any]:
@@ -13,7 +14,7 @@ async def get_rooms() -> List[Any]:
 
     result = []
     for room in rooms:
-        members = sorted(rooms.members, key=lambda m: m.joined_at)  # type: ignore
+        members = sorted(room.members, key=lambda m: m.joined_at)  # type: ignore
         first_member = members[0] if members else None
 
         result.append(
@@ -28,3 +29,11 @@ async def get_rooms() -> List[Any]:
         )
 
     return result
+
+
+async def create_room(uuid: UUID, name: str, is_difficult: bool) -> str:
+    room = await Room.create(name=name, is_difficult=is_difficult)
+    user = await User.get(id=uuid)
+    _ = await RoomMember.create(room=room, user=user)
+
+    return str(room.id)

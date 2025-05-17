@@ -10,30 +10,23 @@ class ConnectionManager:
     """TODO: docstring нахерачить"""
 
     def __init__(self):
-        self.clientConnections: Dict[int, WebSocket] = {}
-        self.restart_votes: Dict[int, Set[int]] = {}
-        self.opponents: Dict[int, int] = {}
-        self.rooms: Dict[int, List[int]] = {}
-        self.last_disconnect_time: Dict[int, float] = {}
+        self.clientConnections: Dict[str, WebSocket] = {}
+        self.restart_votes: Dict[str, Set[str]] = {}
+        self.opponents: Dict[str, str] = {}
+        self.rooms: Dict[str, List[str]] = {}
+        self.last_disconnect_time: Dict[str, float] = {}
         self.is_difficult: bool = False
 
     async def connect(
-        self, websocket: WebSocket, room_id: int, user_id: int, difficult: bool
+        self, websocket: WebSocket, room_id: str, user_id: str, difficult: bool
     ):
         await websocket.accept()
         self.clientConnections[user_id] = websocket
         self.is_difficult = difficult
-        # Че то срет много и не уменьшает потом кстати
-        if user_id not in self.rooms.get(room_id, []):
-            last_disconnect = self.last_disconnect_time.get(user_id, 0)
-            if time.time() - last_disconnect > 1:
-                _ = requests.patch(f"http://localhost:8000/rooms/{room_id}?method=add")
-                # _ = requests.patch(f'http://room_api:8000/rooms/{room_id}?method=add')
-                print(f"[INFO] New active user {user_id} in room {room_id}")
 
         await self._match_clients(user_id, room_id)
 
-    def disconnect(self, user_id: int):
+    def disconnect(self, user_id: str):
         if user_id in self.clientConnections:
             del self.clientConnections[user_id]
             self.last_disconnect_time[user_id] = time.time()
@@ -52,16 +45,13 @@ class ConnectionManager:
                     print(f"[WARNING] Error notify opponent: {error}")
 
             self.opponents.pop(user_id, None)
-            self.opponents.pop(opponent_id, None)
+            self.opponents.pop(opponent_id, None)  # type: ignore
 
             for room_id, room in self.rooms.items():
                 if user_id in room:
                     room.remove(user_id)
-                    _ = requests.patch(
-                        f"http://localhost:8000/rooms/{room_id}?method=min"
-                    )  # Передача **имени** контейнера с апи
 
-    async def _match_clients(self, user_id: int, room_id: int):
+    async def _match_clients(self, user_id: str, room_id: str):
         if room_id not in self.rooms:
             self.rooms[room_id] = []
         self.rooms[room_id].append(user_id)
@@ -81,8 +71,6 @@ class ConnectionManager:
                 "method": "join",
                 "symbol": "X",
                 "turn": "X",
-                "roomID": room_id,
-                "difficult": self.is_difficult,
             },
         )
 
@@ -92,17 +80,15 @@ class ConnectionManager:
                 "method": "join",
                 "symbol": "O",
                 "turn": "X",
-                "roomID": room_id,
-                "difficult": self.is_difficult,
             },
         )
 
-    async def _send(self, user_id: int, message: Dict[str, str | int]):
+    async def _send(self, user_id: str, message: Dict[str, str | int]):
         ws = self.clientConnections.get(user_id)
         if ws:
             await ws.send_json(message)
 
-    async def handle_restart(self, user_id: int, room_id: int):
+    async def handle_restart(self, user_id: str, room_id: str):
         if room_id not in self.restart_votes:
             self.restart_votes[room_id] = set()
 
@@ -120,25 +106,25 @@ class ConnectionManager:
 
             await self._send(
                 user_id,
-                {"method": "restart", "field": empty_field, "message": "Game restarted!"},
+                {"method": "restart", "field": empty_field, "message": "Game restarted!"},  # type: ignore
             )
             await self._send(
                 opponent,
-                {"method": "restart", "field": empty_field, "message": "Game restarted!"},
+                {"method": "restart", "field": empty_field, "message": "Game restarted!"},  # type: ignore
             )
 
-    async def handle_move(self, user_id: int, data: Dict[str, str | int]):
+    async def handle_move(self, user_id: str, data: Dict[str, str | int]):
         opponent_id = self.opponents.get(user_id)
         if not opponent_id:
             return
 
-        field = data.get("field")
+        field = data.get("field", [])
         symbol = data.get("symbol")
 
-        if self._check_winner(field):
+        if self._check_winner(field):  # type: ignore
             result_message = {
                 "method": "result",
-                "message": f"{symbol} win!",
+                "message": f"{symbol} победил!",
                 "field": field,
             }
             await self._send(user_id, result_message)
@@ -146,10 +132,10 @@ class ConnectionManager:
 
             return
 
-        if self._check_draw(field):
+        if self._check_draw(field):  # type: ignore
             draw_message = {
                 "method": "result",
-                "message": "Draw",
+                "message": "Ничья",
                 "field": field,
             }
             await self._send(user_id, draw_message)

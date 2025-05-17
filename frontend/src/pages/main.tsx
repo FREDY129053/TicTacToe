@@ -5,53 +5,13 @@ import { decodeJWT } from "@/functions/decodeJWT";
 import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { FullUser, getUserById } from "./api/user";
+import { IRoom } from "@/interfaces/IRoom";
+import { getRooms } from "./api/room";
 
 export default function Main() {
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [user, setUser] = useState<FullUser | null>(null);
-
-  const rooms = [
-    {
-      uuid: "dhsdjaaghjdgahdash",
-      name: "ewqrt",
-      isHard: false,
-      membersIn: 1,
-      memberAvatar: "https://i.ibb.co/vvTcSJr7/0df72d147985.png",
-      memberUsername: "djashdaj",
-    },
-    {
-      uuid: "dhsdjaaghjdgahdash",
-      name: "ewqrt",
-      isHard: true,
-      membersIn: 1,
-      memberAvatar: "https://i.ibb.co/vvTcSJr7/0df72d147985.png",
-      memberUsername: "djashdaj",
-    },
-    {
-      uuid: "dhsdjaaghjdgahdash",
-      name: "ewqrt",
-      isHard: true,
-      membersIn: 1,
-      memberAvatar: "https://i.ibb.co/vvTcSJr7/0df72d147985.png",
-      memberUsername: "djashdaj",
-    },
-    {
-      uuid: "dhsdjaaghjdgahdash",
-      name: "ewqrt",
-      isHard: false,
-      membersIn: 1,
-      memberAvatar: "https://i.ibb.co/vvTcSJr7/0df72d147985.png",
-      memberUsername: "djashdaj",
-    },
-    {
-      uuid: "dhsdjaaghjdgahdash",
-      name: "ewqrt",
-      isHard: true,
-      membersIn: 1,
-      memberAvatar: "https://i.ibb.co/vvTcSJr7/0df72d147985.png",
-      memberUsername: "djashdaj",
-    },
-  ];
+  const [rooms, setRooms] = useState<IRoom[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -59,6 +19,20 @@ export default function Main() {
     if (!uuid) return;
 
     getUserById(uuid).then(setUser).catch(console.error);
+
+    const fetchRooms = () => {
+      getRooms()
+        .then((newRooms) => {
+          setRooms([...newRooms]);
+        })
+        .catch(console.error);
+    };
+
+    fetchRooms();
+
+    const interval = setInterval(fetchRooms, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -77,10 +51,7 @@ export default function Main() {
       <CreateRoomForm
         isOpen={isCreateRoomOpen}
         onClose={() => setIsCreateRoomOpen(false)}
-        onSubmit={(data) => {
-          console.log("Room data:", data);
-          setIsCreateRoomOpen(false);
-        }}
+        onSubmit={() => {}}
       />
     </div>
   );
