@@ -6,7 +6,7 @@ from backend.api.src.helpers import (
     create_jwt_token,
     hash_pass,
 )
-from backend.api.src.schemas import ServiceMessage, FullUser
+from backend.api.src.schemas import ServiceMessage, UpdateStats
 
 
 async def user_enter(username: str, password: str) -> ServiceMessage:
@@ -47,3 +47,23 @@ async def get_user_by_uuid(uuid: UUID) -> ServiceMessage:
         return ServiceMessage(is_error=True, message="user not found", status_code=404)
 
     return ServiceMessage(message=user, status_code=200)
+
+
+async def update_stats(data: UpdateStats) -> ServiceMessage:
+    wins, losses, draws = False, False, False
+    print(f"DEBUG\t{data.stat_type}")
+    if data.stat_type == "wins":
+        wins = True
+    if data.stat_type == "losses":
+        losses = True
+    if data.stat_type == "draws":
+        draws = True
+
+    _ = await UserRepo.update_stats(data.user_uuid, wins, losses, draws)
+
+    return ServiceMessage(message="updated stats", status_code=200)
+
+
+async def get_stats(uuid: UUID) -> ServiceMessage:
+    result = await UserRepo.get_stats(uuid)
+    return ServiceMessage(message=result, status_code=200)

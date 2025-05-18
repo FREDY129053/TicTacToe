@@ -49,11 +49,9 @@ class ConnectionManager:
 
             self.opponents.pop(user_id, None)
             self.opponents.pop(opponent_id, None)  # type: ignore
-            print(f"{user_id}\n{self.rooms.items()}")
             for room_id, room in self.rooms.items():
                 if user_id in room:
                     room.remove(user_id)
-                    print(f"Need delete\n{room_id} | {user_id}")
                     asyncio.create_task(self._remove_user_from_room(user_id, room_id))
 
     async def _match_clients(self, user_id: str, room_id: str):
@@ -123,10 +121,20 @@ class ConnectionManager:
                     f"{API_BASE_URL}/delete_member",
                     params={"user_uuid": user_id, "room_uuid": room_id},
                 )
-                print(f"RESP = {response.status_code}")
                 response.raise_for_status()
         except Exception as e:
             print(f"[ERROR] Не удалось удалить пользователя из комнаты: {e}")
+
+    async def _update_user_stats(self, user_id: str, type: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.patch(
+                    "http://localhost:8080/api/users/update_stats",
+                    json={"user_uuid": user_id, "stat_type": type},
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось обновить ститистику пользователя: {e}")
 
     async def handle_restart(self, user_id: str, room_id: str):
         if room_id not in self.restart_votes:
@@ -169,6 +177,8 @@ class ConnectionManager:
             }
             await self._send(user_id, result_message)
             await self._send(opponent_id, result_message)
+            await self._update_user_stats(user_id, "wins")
+            await self._update_user_stats(opponent_id, "losses")
 
             return
 
@@ -180,6 +190,8 @@ class ConnectionManager:
             }
             await self._send(user_id, draw_message)
             await self._send(opponent_id, draw_message)
+            await self._update_user_stats(user_id, "draws")
+            await self._update_user_stats(opponent_id, "draws")
 
             return
 

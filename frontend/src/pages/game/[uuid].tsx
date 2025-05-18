@@ -16,6 +16,18 @@ export default function Game() {
   const symbolRef = useRef<"X" | "O" | "">("");
   const moveQueue = useRef(new Queue());
 
+  const makeRestart = () => {
+    socket?.send(
+      JSON.stringify({
+        method: "restart",
+      })
+    );
+  };
+
+  const [isReady, setIsReady] = useState(false);
+  const [uuid, setUuid] = useState<string | null>(null);
+  const [isDifficult, setIsDifficult] = useState(false);
+
   const makeMove = useCallback(
     (index: number) => {
       if (!isGameActive || field[index] !== "") return;
@@ -40,20 +52,8 @@ export default function Game() {
         })
       );
     },
-    [field, isGameActive, socket]
+    [field, isDifficult, isGameActive, socket]
   );
-
-  const makeRestart = () => {
-    socket?.send(
-      JSON.stringify({
-        method: "restart",
-      })
-    );
-  };
-
-  const [isReady, setIsReady] = useState(false);
-  const [uuid, setUuid] = useState<string | null>(null);
-  const [isDifficult, setIsDifficult] = useState(false);
 
   useEffect(() => {
     if (router.isReady) {

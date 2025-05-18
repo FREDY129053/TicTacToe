@@ -1,3 +1,4 @@
 from .result import Result
+from .stats_data import StatType
 
-__all__ = ["Result"]
+__all__ = ["Result", "StatType"]
