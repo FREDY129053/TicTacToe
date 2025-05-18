@@ -2,6 +2,7 @@ import GameRoom from "@/components/GameRoom";
 import { decodeJWT } from "@/functions/decodeJWT";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import GameLayout from "@/components/layouts/GameLayout";
 
 export default function Game() {
   const router = useRouter();
@@ -161,7 +162,8 @@ export default function Game() {
   }, [isReady, uuid, isDifficult]);
 
   return (
-    <GameRoom
+    <GameLayout>
+      <GameRoom
       message={message}
       field={field}
       isEndGame={isEndGame}
@@ -169,6 +171,7 @@ export default function Game() {
       makeRestart={makeRestart}
       restartVotes={restartVotes}
     />
+    </GameLayout>
   );
 }
 

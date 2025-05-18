@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { BsArrowLeftShort, BsPerson } from "react-icons/bs";
 import { AiOutlineLogout } from "react-icons/ai";
+import { SiGoogleclassroom } from "react-icons/si"
 import { FaRobot } from "react-icons/fa";
 import Image from "next/image";
 import Loading from "./Loading";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Sidebar({
   username,
@@ -13,6 +16,8 @@ export default function Sidebar({
   avatar: string | undefined;
 }) {
   const [open, setOpen] = useState<boolean>(true);
+  const router = useRouter();
+  const path = router.pathname;
 
   const Menus = [
     {
@@ -20,12 +25,28 @@ export default function Sidebar({
       icon: <BsPerson />,
       spacing: true,
       hover: "hover:bg-light-white",
+      to: "/me",
+      isShow: path !== "/me",
     },
-    { title: "Игра с ботом", icon: <FaRobot />, hover: "hover:bg-light-white" },
+    {
+      title: "Комнаты",
+      icon: <SiGoogleclassroom />,
+      spacing: true,
+      hover: "hover:bg-light-white",
+      to: "/main",
+      isShow: path !== "/main",
+    },
+    {
+      title: "Игра с ботом",
+      icon: <FaRobot />,
+      hover: "hover:bg-light-white",
+      spacing: true,
+    },
     {
       title: "Выход",
       icon: <AiOutlineLogout />,
       hover: "hover:bg-red-400 hover:text-white",
+      spacing: true,
     },
   ];
 
@@ -66,20 +87,47 @@ export default function Sidebar({
       <ul className="pt-2">
         {Menus.map((menu, index) => (
           <React.Fragment key={index}>
-            <li
-              className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${
-                menu.hover
-              } rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
-            >
-              <span className="text-2xl block float-left">{menu.icon} </span>
-              <span
-                className={`duration-300 text-base font-medium flex-1 ${
-                  !open && "hidden"
-                }`}
-              >
-                {menu.title}
-              </span>
-            </li>
+            {(menu.isShow == undefined || menu.isShow) && (
+              <>
+                {menu.to ? (
+                  <Link href={menu.to}>
+                    <li
+                      className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${
+                        menu.hover
+                      } rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
+                    >
+                      <span className="text-2xl block float-left">
+                        {menu.icon}{" "}
+                      </span>
+                      <span
+                        className={`duration-300 text-base font-medium flex-1 ${
+                          !open && "hidden"
+                        }`}
+                      >
+                        {menu.title}
+                      </span>
+                    </li>
+                  </Link>
+                ) : (
+                  <li
+                    className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${
+                      menu.hover
+                    } rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
+                  >
+                    <span className="text-2xl block float-left">
+                      {menu.icon}{" "}
+                    </span>
+                    <span
+                      className={`duration-300 text-base font-medium flex-1 ${
+                        !open && "hidden"
+                      }`}
+                    >
+                      {menu.title}
+                    </span>
+                  </li>
+                )}
+              </>
+            )}
           </React.Fragment>
         ))}
       </ul>
