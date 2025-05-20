@@ -5,12 +5,14 @@ interface LoadingProps {
   size?: string;
   variant?: "spinner" | "dots";
   className?: string;
+  isDark?: boolean
 }
 
 export default function Loading({
   size = "w-6 h-6",
   variant = "spinner",
   className = "",
+  isDark = false,
 }: LoadingProps) {
   if (variant === "dots") {
     return (
@@ -49,14 +51,14 @@ export default function Loading({
             cx="12"
             cy="12"
             r="10"
-            stroke="#ffce00"
+            stroke={isDark ? "#1c1c1c" : "#ffce00"}
             strokeWidth="1.5"
             strokeOpacity="0.2"
             fill="none"
           />
           <path
             d="M12 2a10 10 0 0 1 10 10"
-            stroke="#ffce00"
+            stroke={isDark ? "#1c1c1c" : "#ffce00"}
             strokeWidth="1.5"
             strokeLinecap="round"
             fill="none"

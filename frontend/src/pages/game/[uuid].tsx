@@ -164,13 +164,13 @@ export default function Game() {
   return (
     <GameLayout>
       <GameRoom
-      message={message}
-      field={field}
-      isEndGame={isEndGame}
-      makeMove={makeMove}
-      makeRestart={makeRestart}
-      restartVotes={restartVotes}
-    />
+        message={message}
+        field={field}
+        isEndGame={isEndGame}
+        makeMove={makeMove}
+        makeRestart={makeRestart}
+        restartVotes={restartVotes}
+      />
     </GameLayout>
   );
 }

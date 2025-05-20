@@ -31,7 +31,7 @@ async def user_enter(username: str, password: str) -> ServiceMessage:
             return ServiceMessage(message=token, status_code=200)
         else:
             return ServiceMessage(
-                is_error=True, message="wrong password", status_code=400
+                is_error=True, message="Неверный пароль!", status_code=400
             )
 
 

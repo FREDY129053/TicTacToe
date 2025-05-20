@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaTimes } from "react-icons/fa";
+import Loading from "./Loading";
 
 type Props = {
   isOpen: boolean;
@@ -14,12 +15,14 @@ type Props = {
 export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
   const [name, setName] = useState("");
   const [isDifficult, setIsDifficult] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter()
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     const uuid = decodeJWT(token);
+    setIsLoading(true);
     axios
       .post(
         "http://localhost:8080/api/rooms",
@@ -42,7 +45,9 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
           "Ошибка:",
           error.response ? error.response.data : error.message
         );
-      });
+      }).finally(() => {
+        setIsLoading(false);
+      });;
     setName('')
     setIsDifficult(false)
     onSubmit();
@@ -60,7 +65,7 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
       <div className="bg-white/5 border border-white/10 rounded-2xl shadow-xl shadow-black/30 p-8 w-[90%] max-w-md text-white relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white hover:text-red-400 transition"
+          className="absolute top-4 right-4 text-white hover:text-red-400 transition cursor-pointer"
         >
           <FaTimes size={20} />
         </button>
@@ -79,6 +84,7 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              autoComplete="off"
               required
               className="bg-white/10 border border-white/10 rounded-xl px-4 py-2 outline-none text-white placeholder-white/50 focus:ring-2 focus:ring-[#ffce00]"
               placeholder="Например, Комната акулы"
@@ -90,12 +96,14 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
               type="checkbox"
               id="isHard"
               checked={isDifficult}
+              tabIndex={0}
               onChange={(e) => setIsDifficult(e.target.checked)}
               name="isHard"
               className="absolute opacity-0 w-0 h-0 peer"
             />
             <label
               htmlFor="isHard"
+              tabIndex={0}
               className="w-5 h-5 rounded-md border border-white/20 bg-white/10 peer-checked:bg-[#ffce00] peer-checked:border-[#ffce00] transition-all flex items-center justify-center cursor-pointer"
             >
               <svg
@@ -116,8 +124,9 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
 
           <button
             type="submit"
-            className="cursor-pointer mt-2 bg-[#ffce00] hover:bg-[#ffd836] text-[#1c1c1c] font-semibold rounded-2xl px-6 py-3 transition"
+            className={`cursor-pointer mt-2 bg-[#ffce00] hover:bg-[#ffd836] text-[#1c1c1c] font-semibold rounded-2xl px-6 py-3 transition ${isLoading && "flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-[#ffe28c] disabled:text-[#9e9e9e]"}`}
           >
+            {isLoading && <Loading className="!w-5 !h-5" isDark={true} />}
             Создать
           </button>
         </form>

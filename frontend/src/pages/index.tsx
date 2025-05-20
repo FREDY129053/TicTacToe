@@ -2,7 +2,15 @@ import { LoginModal } from "@/components/LoginForm";
 import Image from "next/image";
 import { useState } from "react";
 
-const FadeIn = ({ children, className = "", delay = 0 }) => {
+import { ReactNode } from "react";
+
+type FadeInProps = {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+};
+
+const FadeIn = ({ children, className = "", delay = 0 }: FadeInProps) => {
   return (
     <div
       className={`opacity-0 animate-fadein ${className}`}
@@ -14,7 +22,7 @@ const FadeIn = ({ children, className = "", delay = 0 }) => {
 };
 
 export default function Home() {
-  const [showLogin, setShowLogin] = useState(false)
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <div className="w-full h-screen relative flex items-center justify-center">
@@ -39,9 +47,11 @@ export default function Home() {
         <FadeIn delay={100}>
           <div className="flex flex-col gap-16 items-center">
             <h3 className="text-center text-white font-mono leading-none text-4xl 2xl:text-6xl">
-              <span className="block">TIC</span>
-              <span className="block">TAC</span>
-              <span className="block">TOE</span>
+              <div className="flex flex-col gap-1 custom-anim">
+                <span>TIC</span>
+                <span>TAC</span>
+                <span>TOE</span>
+              </div>
               <span className="block text-[#cfd2ff] text-base 2xl:text-xl">
                 by Lyubaya Akula
               </span>
@@ -49,13 +59,13 @@ export default function Home() {
             <div className="flex flex-col gap-6">
               <button
                 onClick={() => setShowLogin(true)}
-                className="bg-[#ffce00] hover:bg-[#ffd836] text-[#1c1c1c] cursor-pointer rounded-2xl px-6 py-3"
+                className="bg-[#ffce00] hover:bg-[#ffd836] text-[#1c1c1c] cursor-pointer rounded-2xl px-6 py-3 transition-colors duration-200"
                 type="button"
               >
                 Играть онлайн
               </button>
               <button
-                className="bg-[#7b81f1] hover:bg-[#9da1f9] text-white cursor-pointer rounded-2xl px-6 py-3"
+                className="bg-[#7b81f1] hover:bg-[#9da1f9] text-white cursor-pointer rounded-2xl px-6 py-3 transition-colors duration-200"
                 type="button"
               >
                 Играть с ботом
