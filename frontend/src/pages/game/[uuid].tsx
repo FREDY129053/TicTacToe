@@ -128,9 +128,13 @@ export default function Game() {
 
         case "restart":
           setField(response.field);
-          setIsGameActive(true);
+          setIsGameActive(symbolRef.current === response.turn);
           setIsEndGame(false);
-          setMessage(response.message);
+          setMessage(
+            symbolRef.current === response.turn
+              ? "Ваш ход"
+              : "Ожидаем соперника..."
+          )
           moveQueue.current = new Queue();
           setRestartVotes(0);
           break;
@@ -139,6 +143,7 @@ export default function Game() {
           setIsGameActive(false);
           setIsEndGame(false);
           setMessage(response.message);
+          setField(Array(9).fill(""))
           break;
 
         default:

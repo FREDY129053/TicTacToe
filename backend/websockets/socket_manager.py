@@ -42,7 +42,7 @@ class ConnectionManager:
                     self.clientConnections[opponent_id].send_json(
                         {
                             "method": "left",
-                            "message": "Противник съебал",
+                            "message": "Поиск соперника...",
                         }
                     )
                 )
@@ -154,11 +154,19 @@ class ConnectionManager:
 
             await self._send(
                 user_id,
-                {"method": "restart", "field": empty_field, "message": "Game restarted!"},  # type: ignore
+                {
+                    "method": "restart",
+                    "field": empty_field,
+                    "turn": "X",
+                },  # type: ignore
             )
             await self._send(
                 opponent,
-                {"method": "restart", "field": empty_field, "message": "Game restarted!"},  # type: ignore
+                {
+                    "method": "restart",
+                    "field": empty_field,
+                    "turn": "X",
+                },  # type: ignore
             )
 
     async def handle_move(self, user_id: str, data: Dict[str, str | int]):
