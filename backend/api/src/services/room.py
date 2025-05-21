@@ -1,5 +1,6 @@
 import backend.api.src.repository.room as RoomRepo
 from backend.api.src.schemas import CreateRoom, ServiceMessage
+from backend.api.src.helpers import decode_jwt_token
 from uuid import UUID
 
 
@@ -25,6 +26,15 @@ async def is_user_in_room(user_uuid: UUID, room_uuid: UUID) -> ServiceMessage:
 
 async def get_all_members() -> ServiceMessage:
     data = await RoomRepo.get_all_rooms_and_members()
+
+    return ServiceMessage(message=data, status_code=200)
+
+
+async def get_all_members_at_room(uuid: UUID, token: str) -> ServiceMessage:
+    user_uuid = decode_jwt_token(token)
+    data = await RoomRepo.get_all_room_members(
+        uuid, exclude_user=user_uuid.get("uuid", "")
+    )
 
     return ServiceMessage(message=data, status_code=200)
 

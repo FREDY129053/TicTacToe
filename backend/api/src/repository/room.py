@@ -68,3 +68,19 @@ async def delete_user_from_room(uuid: UUID, room_uuid: UUID) -> bool:
 
 async def get_all_rooms_and_members() -> List[RoomMember]:
     return await RoomMember.all()
+
+
+async def get_all_room_members(uuid: UUID, exclude_user: str):
+    room = await Room.get(id=uuid)
+    members = (
+        await RoomMember.filter(room=room)
+        .exclude(user_id=exclude_user)
+        .prefetch_related("user")
+    )
+    if not members:
+        return None
+    opponent = members[0]
+    return {
+        "avatar_url": opponent.user.avatar_url,
+        "username": opponent.user.username,
+    }

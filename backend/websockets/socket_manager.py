@@ -182,6 +182,7 @@ class ConnectionManager:
                 "method": "result",
                 "message": f"{symbol} победил!",
                 "field": field,
+                "symbol": symbol,
             }
             await self._send(user_id, result_message)
             await self._send(opponent_id, result_message)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 import backend.api.src.services.room as RoomService
 from backend.api.src.schemas import CreateRoom, AddMember
@@ -38,6 +38,15 @@ async def check_user_in_room(user_uuid: UUID, room_uuid: UUID):
 @room_router.get("/all_members")
 async def get_all_rooms_and_members():
     message = await RoomService.get_all_members()
+
+    return message.message
+
+
+@room_router.get("/{uuid}/opponent")
+async def get_all_members_in_room(request: Request, uuid: UUID):
+    message = await RoomService.get_all_members_at_room(
+        uuid, request.cookies.get("user", "")
+    )
 
     return message.message
 

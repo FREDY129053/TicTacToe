@@ -3,6 +3,8 @@ import { decodeJWT } from "@/functions/decodeJWT";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import GameLayout from "@/components/layouts/GameLayout";
+import { getOpponent, getUserById } from "@/pages/api/user";
+import { IUserAtRoomData } from "@/interfaces/IUser";
 
 export default function Game() {
   const router = useRouter();
@@ -13,6 +15,9 @@ export default function Game() {
   const [isEndGame, setIsEndGame] = useState<boolean>(false);
   const [isGameActive, setIsGameActive] = useState<boolean>(false);
   const [restartVotes, setRestartVotes] = useState<number>(0);
+  const [currPlayer, setCurrPlayer] = useState<"left" | "right" | null>(null);
+  const [isShowMessage, setIsShowMessage] = useState<boolean>(true);
+  const [isWinner, setIsWinner] = useState<boolean>(false)
 
   const symbolRef = useRef<"X" | "O" | "">("");
   const moveQueue = useRef(new Queue());
@@ -28,6 +33,8 @@ export default function Game() {
   const [isReady, setIsReady] = useState(false);
   const [uuid, setUuid] = useState<string | null>(null);
   const [isDifficult, setIsDifficult] = useState(false);
+  const [me, setMe] = useState<IUserAtRoomData|null>(null)
+  const [opponent, setOpponent] = useState<IUserAtRoomData|null>(null)
 
   const makeMove = useCallback(
     (index: number) => {
@@ -81,6 +88,10 @@ export default function Game() {
       return;
     }
 
+    getUserById(userUUID)
+    .then((user) => setMe({ avatar_url: user.avatar_url, username: user.username }))
+    .catch(console.error);
+
     const ws = new WebSocket(
       `ws://127.0.0.1:8000/ws/game/${uuid}?user_id=${userUUID}&is_hard=${isDifficult}`
     );
@@ -96,21 +107,17 @@ export default function Game() {
         case "join":
           symbolRef.current = response.symbol;
           setIsGameActive(response.symbol === response.turn);
-          setMessage(
-            response.symbol === response.turn
-              ? "Ваш ход"
-              : "Ожидаем соперника..."
-          );
+          setCurrPlayer(response.symbol === response.turn ? "left" : "right");
+          setMessage("w");
+          setIsShowMessage(false);
+          getOpponent(uuid).then(setOpponent).catch(console.error)
           break;
 
         case "update":
           setField(response.field);
           setIsGameActive(response.turn === symbolRef.current);
-          setMessage(
-            symbolRef.current === response.turn
-              ? "Ваш ход"
-              : "Ожидаем соперника..."
-          );
+          setIsShowMessage(false);
+          setCurrPlayer(symbolRef.current === response.turn ? "left" : "right");
           break;
 
         case "result":
@@ -120,6 +127,8 @@ export default function Game() {
             setMessage(response.message);
             setIsEndGame(true);
           }, 300);
+          setIsWinner(response?.symbol === symbolRef.current)
+          setIsShowMessage(true);
           break;
 
         case "restart_vote":
@@ -130,11 +139,10 @@ export default function Game() {
           setField(response.field);
           setIsGameActive(symbolRef.current === response.turn);
           setIsEndGame(false);
-          setMessage(
-            symbolRef.current === response.turn
-              ? "Ваш ход"
-              : "Ожидаем соперника..."
-          )
+          setIsShowMessage(false);
+          setMessage("w");
+          setIsWinner(false)
+          setCurrPlayer(symbolRef.current === response.turn ? "left" : "right");
           moveQueue.current = new Queue();
           setRestartVotes(0);
           break;
@@ -143,7 +151,9 @@ export default function Game() {
           setIsGameActive(false);
           setIsEndGame(false);
           setMessage(response.message);
-          setField(Array(9).fill(""))
+          setField(Array(9).fill(""));
+          setOpponent(null)
+          setIsWinner(false)
           break;
 
         default:
@@ -175,6 +185,11 @@ export default function Game() {
         makeMove={makeMove}
         makeRestart={makeRestart}
         restartVotes={restartVotes}
+        currentPlayer={currPlayer}
+        isShowMessage={isShowMessage}
+        me={me}
+        opponent={opponent}
+        isWinner={isWinner}
       />
     </GameLayout>
   );

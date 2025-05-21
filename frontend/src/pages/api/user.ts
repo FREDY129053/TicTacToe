@@ -1,3 +1,5 @@
+import { IUserAtRoomData } from "@/interfaces/IUser";
+
 export interface FullUser {
   id: string;
   username: string;
@@ -45,4 +47,21 @@ export async function getUserStats(userId: string): Promise<Stats> {
 
   const stats: Stats = await res.json();
   return stats;
+}
+
+
+export async function getOpponent(roomId: string): Promise<IUserAtRoomData | null> {
+  const res = await fetch(`http://localhost:8080/api/rooms/${roomId}/opponent`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    throw new Error(`Ошибка при получении пользователя: ${res.statusText}`);
+  }
+
+  return await res.json()
 }
