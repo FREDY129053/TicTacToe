@@ -21,7 +21,7 @@ async def main_game(websocket: WebSocket, room_id: str, user_id: str, is_hard: b
             match message.get("method"):
                 case "move":
                     await manager.handle_move(user_id=user_id, data=message)
-                case "restart":
-                    await manager.handle_restart(user_id=user_id, room_id=room_id)
+                case "game_start":
+                    await manager.handle_game_start(user_id=user_id, room_id=room_id)
     except WebSocketDisconnect:
         await manager.disconnect(user_id=user_id)

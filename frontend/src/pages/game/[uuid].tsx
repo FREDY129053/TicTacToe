@@ -14,18 +14,19 @@ export default function Game() {
   const [field, setField] = useState<string[]>(Array(9).fill(""));
   const [isEndGame, setIsEndGame] = useState<boolean>(false);
   const [isGameActive, setIsGameActive] = useState<boolean>(false);
-  const [restartVotes, setRestartVotes] = useState<number>(0);
+  const [readyVotes, setReadyVotes] = useState<number>(0);
   const [currPlayer, setCurrPlayer] = useState<"left" | "right" | null>(null);
   const [isShowMessage, setIsShowMessage] = useState<boolean>(true);
   const [isWinner, setIsWinner] = useState<boolean>(false)
+  const [isWaitingReady, setIsWaitingReady] = useState<boolean>(false)
 
   const symbolRef = useRef<"X" | "O" | "">("");
   const moveQueue = useRef(new Queue());
 
-  const makeRestart = () => {
+  const makeReady = () => {
     socket?.send(
       JSON.stringify({
-        method: "restart",
+        method: "game_start",
       })
     );
   };
@@ -104,14 +105,21 @@ export default function Game() {
       const response = JSON.parse(event.data);
 
       switch (response.method) {
-        case "join":
-          symbolRef.current = response.symbol;
-          setIsGameActive(response.symbol === response.turn);
-          setCurrPlayer(response.symbol === response.turn ? "left" : "right");
-          setMessage("w");
+        case "start":
+          setIsWaitingReady(true)
           setIsShowMessage(false);
+          setMessage("w");
           getOpponent(uuid).then(setOpponent).catch(console.error)
           break;
+
+        // case "join":
+        //   symbolRef.current = response.symbol;
+        //   setIsGameActive(response.symbol === response.turn);
+        //   setCurrPlayer(response.symbol === response.turn ? "left" : "right");
+        //   setMessage("w");
+        //   setIsShowMessage(false);
+        //   getOpponent(uuid).then(setOpponent).catch(console.error)
+        //   break;
 
         case "update":
           setField(response.field);
@@ -131,20 +139,21 @@ export default function Game() {
           setIsShowMessage(true);
           break;
 
-        case "restart_vote":
-          setRestartVotes(response.votes);
+        case "ready_vote":
+          setReadyVotes(response.votes);
           break;
 
-        case "restart":
+        case "game_start":
           setField(response.field);
-          setIsGameActive(symbolRef.current === response.turn);
+          symbolRef.current = response.symbol;
+          setIsGameActive(response.symbol === response.turn);
+          setCurrPlayer(response.symbol === response.turn ? "left" : "right");
           setIsEndGame(false);
           setIsShowMessage(false);
           setMessage("w");
           setIsWinner(false)
-          setCurrPlayer(symbolRef.current === response.turn ? "left" : "right");
           moveQueue.current = new Queue();
-          setRestartVotes(0);
+          setReadyVotes(0);
           break;
 
         case "left":
@@ -183,13 +192,14 @@ export default function Game() {
         field={field}
         isEndGame={isEndGame}
         makeMove={makeMove}
-        makeRestart={makeRestart}
-        restartVotes={restartVotes}
+        makeReady={makeReady}
+        readyVotes={readyVotes}
         currentPlayer={currPlayer}
         isShowMessage={isShowMessage}
         me={me}
         opponent={opponent}
         isWinner={isWinner}
+        isWaitingReady={isWaitingReady}
       />
     </GameLayout>
   );

@@ -13,7 +13,7 @@ class ConnectionManager:
 
     def __init__(self):
         self.clientConnections: Dict[str, WebSocket] = {}
-        self.restart_votes: Dict[str, Set[str]] = {}
+        self.ready_votes: Dict[str, Set[str]] = {}
         self.opponents: Dict[str, str] = {}
         self.rooms: Dict[str, List[str]] = {}
         self.last_disconnect_time: Dict[str, float] = {}
@@ -71,17 +71,17 @@ class ConnectionManager:
         await self._send(
             player_1,
             {
-                "method": "join",
-                "symbol": "X",
-                "turn": "X",
+                "method": "start",
+                # "symbol": "X",
+                # "turn": "X",
             },
         )
         await self._send(
             player_2,
             {
-                "method": "join",
-                "symbol": "O",
-                "turn": "X",
+                "method": "start",
+                # "symbol": "O",
+                # "turn": "X",
             },
         )
 
@@ -136,37 +136,40 @@ class ConnectionManager:
         except Exception as e:
             print(f"[ERROR] Не удалось обновить ститистику пользователя: {e}")
 
-    async def handle_restart(self, user_id: str, room_id: str):
-        if room_id not in self.restart_votes:
-            self.restart_votes[room_id] = set()
+    async def handle_game_start(self, user_id: str, room_id: str):
+        if room_id not in self.ready_votes:
+            self.ready_votes[room_id] = set()
 
-        self.restart_votes[room_id].add(user_id)
+        self.ready_votes[room_id].add(user_id)
 
-        votes_count = len(self.restart_votes[room_id])
+        votes_count = len(self.ready_votes[room_id])
 
         opponent = self.opponents[user_id]
-        await self._send(user_id, {"method": "restart_vote", "votes": votes_count})
-        await self._send(opponent, {"method": "restart_vote", "votes": votes_count})
+
+        await self._send(user_id, {"method": "ready_vote", "votes": votes_count})
+        await self._send(opponent, {"method": "ready_vote", "votes": votes_count})
 
         if votes_count >= 2:
-            self.restart_votes[room_id] = set()
+            self.ready_votes[room_id] = set()
             empty_field = [""] * 9
 
             await self._send(
                 user_id,
                 {
-                    "method": "restart",
-                    "field": empty_field,
+                    "method": "game_start",
+                    "field": empty_field,  # type: ignore
                     "turn": "X",
-                },  # type: ignore
+                    "symbol": "O",
+                },
             )
             await self._send(
                 opponent,
                 {
-                    "method": "restart",
-                    "field": empty_field,
+                    "method": "game_start",
+                    "field": empty_field,  # type: ignore
                     "turn": "X",
-                },  # type: ignore
+                    "symbol": "X",
+                },
             )
 
     async def handle_move(self, user_id: str, data: Dict[str, str | int]):

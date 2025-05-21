@@ -9,13 +9,14 @@ interface IRoomProps {
   field: string[];
   isEndGame: boolean;
   makeMove: (index: number) => void;
-  makeRestart: () => void;
-  restartVotes: number;
+  makeReady: () => void;
+  readyVotes: number;
   currentPlayer: "left" | "right" | null;
   isShowMessage: boolean;
   me: IUserAtRoomData | null;
   opponent: IUserAtRoomData | null;
   isWinner: boolean
+  isWaitingReady: boolean
 }
 
 export default function GameRoom({
@@ -23,13 +24,14 @@ export default function GameRoom({
   field,
   isEndGame,
   makeMove,
-  makeRestart,
-  restartVotes,
+  makeReady,
+  readyVotes,
   currentPlayer,
   isShowMessage,
   me,
   opponent,
-  isWinner
+  isWinner,
+  isWaitingReady
 }: IRoomProps) {
   const [dots, setDots] = useState("");
   const {width, height} = useWindowSize()
@@ -149,13 +151,13 @@ export default function GameRoom({
         </div>
       </div>
 
-      {isEndGame && (
+      {isWaitingReady && (
         <div className="mt-6">
           <button
-            onClick={makeRestart}
+            onClick={makeReady}
             className="px-6 py-4 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
           >
-            Начать заново ({restartVotes} / 2)
+            Готов {readyVotes} / 2
           </button>
         </div>
       )}
