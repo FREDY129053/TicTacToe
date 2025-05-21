@@ -124,9 +124,7 @@ export default function GameRoom({
 
       <div className="flex flex-col items-center justify-center gap-6 mt-4">
         <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em]">
-          {isShowMessage ? (
-            message
-          ) : message.endsWith(".") ? (
+          {isShowMessage && message.endsWith(".") ? (
             <div className="flex items-end gap-0.5">
               <div className="leading-none">{message.slice(0, -3)}</div>
               <div className="flex space-x-0.5">
@@ -135,9 +133,7 @@ export default function GameRoom({
                 <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
               </div>
             </div>
-          ) : (
-            <></>
-          )}
+          ) : isShowMessage ? (message) : (<></>)}
         </div>
 
         <div className="board">

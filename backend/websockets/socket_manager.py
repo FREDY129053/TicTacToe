@@ -16,7 +16,6 @@ class ConnectionManager:
         self.ready_votes: Dict[str, Set[str]] = {}
         self.opponents: Dict[str, str] = {}
         self.rooms: Dict[str, List[str]] = {}
-        self.last_disconnect_time: Dict[str, float] = {}
         self.is_difficult: bool = False
 
     async def connect(
@@ -34,7 +33,6 @@ class ConnectionManager:
     async def disconnect(self, user_id: str):
         if user_id in self.clientConnections:
             del self.clientConnections[user_id]
-            self.last_disconnect_time[user_id] = time.time()
 
             opponent_id = self.opponents.get(user_id)
             if opponent_id and opponent_id in self.clientConnections:
@@ -184,7 +182,6 @@ class ConnectionManager:
         if self._check_winner(field):  # type: ignore
             result_message = {
                 "method": "result",
-                "message": f"{symbol} победил!",
                 "field": field,
                 "symbol": symbol,
             }
@@ -200,6 +197,7 @@ class ConnectionManager:
                 "method": "result",
                 "message": "Ничья",
                 "field": field,
+                "symbol": None,
             }
             await self._send(user_id, draw_message)
             await self._send(opponent_id, draw_message)

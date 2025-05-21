@@ -107,19 +107,10 @@ export default function Game() {
       switch (response.method) {
         case "start":
           setIsWaitingReady(true)
-          setIsShowMessage(false);
-          setMessage("w");
+          setIsShowMessage(true);
           getOpponent(uuid).then(setOpponent).catch(console.error)
+          setMessage("Ожидаем готовности...")
           break;
-
-        // case "join":
-        //   symbolRef.current = response.symbol;
-        //   setIsGameActive(response.symbol === response.turn);
-        //   setCurrPlayer(response.symbol === response.turn ? "left" : "right");
-        //   setMessage("w");
-        //   setIsShowMessage(false);
-        //   getOpponent(uuid).then(setOpponent).catch(console.error)
-        //   break;
 
         case "update":
           setField(response.field);
@@ -132,7 +123,11 @@ export default function Game() {
           setField(response.field);
           setIsGameActive(false);
           setTimeout(() => {
-            setMessage(response.message);
+            if (response.symbol === null) {
+              setMessage("Победила дружба")
+            } else {
+              setMessage(response?.symbol === symbolRef.current ? "Вы победили!" : "Вы проиграли");
+            }
             setIsEndGame(true);
           }, 300);
           setIsWinner(response?.symbol === symbolRef.current)
@@ -152,7 +147,6 @@ export default function Game() {
           setIsEndGame(false);
           setIsShowMessage(false);
           setIsWaitingReady(false)
-          setMessage("w");
           setIsWinner(false)
           moveQueue.current = new Queue();
           setReadyVotes(0);
@@ -162,6 +156,7 @@ export default function Game() {
           setIsGameActive(false);
           setIsEndGame(false);
           setMessage(response.message);
+          setIsWaitingReady(false)
           setField(Array(9).fill(""));
           setCurrPlayer(null)
           setOpponent(null)
