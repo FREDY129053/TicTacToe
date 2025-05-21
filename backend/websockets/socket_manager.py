@@ -144,31 +144,32 @@ class ConnectionManager:
 
         votes_count = len(self.ready_votes[room_id])
 
-        opponent = self.opponents[user_id]
+        player_2 = self.rooms[room_id][-1]
+        player_1 = self.rooms[room_id][-2]
 
-        await self._send(user_id, {"method": "ready_vote", "votes": votes_count})
-        await self._send(opponent, {"method": "ready_vote", "votes": votes_count})
+        await self._send(player_1, {"method": "ready_vote", "votes": votes_count})
+        await self._send(player_2, {"method": "ready_vote", "votes": votes_count})
 
         if votes_count >= 2:
             self.ready_votes[room_id] = set()
             empty_field = [""] * 9
 
             await self._send(
-                user_id,
-                {
-                    "method": "game_start",
-                    "field": empty_field,  # type: ignore
-                    "turn": "X",
-                    "symbol": "O",
-                },
-            )
-            await self._send(
-                opponent,
+                player_1,
                 {
                     "method": "game_start",
                     "field": empty_field,  # type: ignore
                     "turn": "X",
                     "symbol": "X",
+                },
+            )
+            await self._send(
+                player_2,
+                {
+                    "method": "game_start",
+                    "field": empty_field,  # type: ignore
+                    "turn": "X",
+                    "symbol": "O",
                 },
             )
 

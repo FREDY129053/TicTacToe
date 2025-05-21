@@ -137,6 +137,7 @@ export default function Game() {
           }, 300);
           setIsWinner(response?.symbol === symbolRef.current)
           setIsShowMessage(true);
+          setIsWaitingReady(true)
           break;
 
         case "ready_vote":
@@ -150,6 +151,7 @@ export default function Game() {
           setCurrPlayer(response.symbol === response.turn ? "left" : "right");
           setIsEndGame(false);
           setIsShowMessage(false);
+          setIsWaitingReady(false)
           setMessage("w");
           setIsWinner(false)
           moveQueue.current = new Queue();
@@ -161,6 +163,7 @@ export default function Game() {
           setIsEndGame(false);
           setMessage(response.message);
           setField(Array(9).fill(""));
+          setCurrPlayer(null)
           setOpponent(null)
           setIsWinner(false)
           break;
