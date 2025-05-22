@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 from uuid import uuid4
 
 import httpx
@@ -242,11 +242,13 @@ class ConnectionManager:
         game_data = self._room_and_game_data[room_id]
         game_id = next(iter(game_data.keys()))
 
-        if self._check_winner(field):  # type: ignore
+        is_winner, comb = self._check_winner(field)  # type: ignore
+        if is_winner:
             result_message = {
                 "method": "result",
                 "field": field,
                 "symbol": symbol,
+                "combination": comb,
             }
             self._room_and_game_data[room_id][game_id] = False
             await self._send(user_id, result_message)
@@ -270,6 +272,7 @@ class ConnectionManager:
                 "message": "Ничья",
                 "field": field,
                 "symbol": None,
+                "combination": [],
             }
             self._room_and_game_data[room_id][game_id] = False
             await self._send(user_id, draw_message)
@@ -300,7 +303,7 @@ class ConnectionManager:
     def _check_draw(self, field: List[str]) -> bool:
         return all(cell != "" for cell in field)
 
-    def _check_winner(self, field: List[str]) -> bool:
+    def _check_winner(self, field: List[str]) -> Tuple[bool, List[int]]:
         winning_combs = [
             [0, 1, 2],
             [3, 4, 5],
@@ -315,6 +318,6 @@ class ConnectionManager:
         for comb in winning_combs:
             a, b, c = comb
             if field[a] != "" and field[a] == field[b] == field[c]:
-                return True
+                return True, comb
 
-        return False
+        return False, []

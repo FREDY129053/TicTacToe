@@ -17,6 +17,7 @@ interface IRoomProps {
   opponent: IUserAtRoomData | null;
   isWinner: boolean
   isWaitingReady: boolean
+  winComb: number[]
 }
 
 export default function GameRoom({
@@ -31,10 +32,12 @@ export default function GameRoom({
   me,
   opponent,
   isWinner,
-  isWaitingReady
+  isWaitingReady,
+  winComb
 }: IRoomProps) {
   const [dots, setDots] = useState("");
   const {width, height} = useWindowSize()
+  console.log(winComb)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -141,7 +144,7 @@ export default function GameRoom({
             <div
               key={index}
               onClick={() => makeMove(index)}
-              className={`cell ${val}`}
+              className={`cell ${winComb.includes(index) ? "bg-red-300!" : ""} ${val}`}
             />
           ))}
         </div>

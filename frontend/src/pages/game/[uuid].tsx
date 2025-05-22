@@ -19,6 +19,7 @@ export default function Game() {
   const [isShowMessage, setIsShowMessage] = useState<boolean>(true);
   const [isWinner, setIsWinner] = useState<boolean>(false)
   const [isWaitingReady, setIsWaitingReady] = useState<boolean>(false)
+  const [winComb, setWinComb] = useState<number[]>([])
 
   const symbolRef = useRef<"X" | "O" | "">("");
   const moveQueue = useRef(new Queue());
@@ -132,6 +133,7 @@ export default function Game() {
           }, 300);
           setIsWinner(response?.symbol === symbolRef.current)
           setIsShowMessage(true);
+          setWinComb(response.combination)
           setIsWaitingReady(true)
           break;
 
@@ -148,6 +150,7 @@ export default function Game() {
           setIsShowMessage(false);
           setIsWaitingReady(false)
           setIsWinner(false)
+          setWinComb([])
           moveQueue.current = new Queue();
           setReadyVotes(0);
           break;
@@ -155,9 +158,11 @@ export default function Game() {
         case "left":
           setIsGameActive(false);
           setIsEndGame(false);
-          setMessage(response.message);
+          setIsShowMessage(true)
+          setMessage("Поиск соперника...");
           setIsWaitingReady(false)
           setField(Array(9).fill(""));
+          setWinComb([])
           setCurrPlayer(null)
           setOpponent(null)
           setIsWinner(false)
@@ -198,6 +203,7 @@ export default function Game() {
         opponent={opponent}
         isWinner={isWinner}
         isWaitingReady={isWaitingReady}
+        winComb={winComb}
       />
     </GameLayout>
   );
