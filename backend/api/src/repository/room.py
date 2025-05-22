@@ -1,7 +1,8 @@
+from datetime import datetime, timezone
 from typing import Any, List
 from uuid import UUID
 from tortoise.functions import Count
-from backend.api.src.db.models import Room, RoomMember, User
+from backend.api.src.db.models import Room, RoomMember, User, Game, GameResult
 
 
 async def get_rooms() -> List[Any]:
@@ -84,3 +85,30 @@ async def get_all_room_members(uuid: UUID, exclude_user: str):
         "avatar_url": opponent.user.avatar_url,
         "username": opponent.user.username,
     }
+
+
+async def create_game_record(room_id: UUID, game_id: UUID, is_hard: bool):
+    room = await Room.get(id=room_id)
+
+    return await Game.create(id=game_id, room=room, is_difficult=is_hard)
+
+
+async def update_game(uuid: UUID):
+    game = await Game.get(id=uuid)
+    game.ended_at = datetime.now(timezone.utc)
+
+    return await game.save()
+
+
+async def write_result(
+    game_uuid: UUID, user_uuid: UUID, opponent_uuid: UUID, result: str
+):
+    return await GameResult.create(
+        game_id=game_uuid, user_id=user_uuid, opponent_id=opponent_uuid, result=result
+    )
+
+
+async def delete_game(uuid: UUID):
+    game = await Game.get(id=uuid)
+
+    return await game.delete()

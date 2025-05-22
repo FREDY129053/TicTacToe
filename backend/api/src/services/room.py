@@ -1,5 +1,5 @@
 import backend.api.src.repository.room as RoomRepo
-from backend.api.src.schemas import CreateRoom, ServiceMessage
+from backend.api.src.schemas import CreateRoom, ServiceMessage, WriteResult
 from backend.api.src.helpers import decode_jwt_token
 from uuid import UUID
 
@@ -49,3 +49,34 @@ async def delete_user_from_room(user_uuid: UUID, room_uuid: UUID) -> ServiceMess
     _ = await RoomRepo.delete_user_from_room(uuid=user_uuid, room_uuid=room_uuid)
 
     return ServiceMessage(message="deleted user from room", status_code=200)
+
+
+async def create_game(room_id: UUID, game_id: UUID, is_hard: bool) -> ServiceMessage:
+    _ = await RoomRepo.create_game_record(
+        room_id=room_id, game_id=game_id, is_hard=is_hard
+    )
+
+    return ServiceMessage(message="game created", status_code=201)
+
+
+async def update_game(uuid: UUID) -> ServiceMessage:
+    await RoomRepo.update_game(uuid)
+
+    return ServiceMessage(message="game updated", status_code=200)
+
+
+async def write_game_result(game_uuid: UUID, game_data: WriteResult) -> ServiceMessage:
+    await RoomRepo.write_result(
+        game_uuid=game_uuid,
+        user_uuid=game_data.user_uuid,
+        opponent_uuid=game_data.opponent_uuid,
+        result=game_data.result,
+    )
+
+    return ServiceMessage(message="result created", status_code=201)
+
+
+async def delete_game(uuid: UUID) -> ServiceMessage:
+    await RoomRepo.delete_game(uuid)
+
+    return ServiceMessage(message="game deleted", status_code=200)

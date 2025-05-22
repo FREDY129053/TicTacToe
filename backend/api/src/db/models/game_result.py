@@ -7,7 +7,9 @@ class GameResult(Model):
     id = fields.IntField(pk=True)
     game = fields.ForeignKeyField("models.Game", related_name="results")
     user = fields.ForeignKeyField("models.User", related_name="game_results")
-    opponent_id = fields.UUIDField(null=True)
+    opponent = fields.ForeignKeyField(
+        "models.User", related_name="opponent_game_results", null=True
+    )
     result = fields.CharEnumField(Result)
 
     class Meta:  # type: ignore

@@ -1,6 +1,6 @@
 import asyncio
-import time
 from typing import Dict, List, Set
+from uuid import uuid4
 
 import httpx
 from fastapi import WebSocket
@@ -17,6 +17,7 @@ class ConnectionManager:
         self.opponents: Dict[str, str] = {}
         self.rooms: Dict[str, List[str]] = {}
         self.is_difficult: bool = False
+        self._room_and_game_data: Dict[str, str] = {}
 
     async def connect(
         self, websocket: WebSocket, room_id: str, user_id: str, difficult: bool
@@ -51,6 +52,9 @@ class ConnectionManager:
                 if user_id in room:
                     room.remove(user_id)
                     asyncio.create_task(self._remove_user_from_room(user_id, room_id))
+                    asyncio.create_task(
+                        self._delete_game(self._room_and_game_data[room_id])
+                    )
 
     async def _match_clients(self, user_id: str, room_id: str):
         if room_id not in self.rooms:
@@ -70,16 +74,12 @@ class ConnectionManager:
             player_1,
             {
                 "method": "start",
-                # "symbol": "X",
-                # "turn": "X",
             },
         )
         await self._send(
             player_2,
             {
                 "method": "start",
-                # "symbol": "O",
-                # "turn": "X",
             },
         )
 
@@ -88,6 +88,8 @@ class ConnectionManager:
         if ws:
             await ws.send_json(message)
 
+    # HTTP запросы
+    # Заросы по комнате
     async def _is_user_in_room(self, user_id: str, room_id: str) -> bool:
         try:
             async with httpx.AsyncClient() as client:
@@ -134,6 +136,56 @@ class ConnectionManager:
         except Exception as e:
             print(f"[ERROR] Не удалось обновить ститистику пользователя: {e}")
 
+    # HTTP запросы
+    # Запросы по самим играм
+    async def _add_game(self, room_id: str, game_id: str, is_hard: bool):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{API_BASE_URL}/{room_id}/start_game?generated_id={game_id}&is_hard={is_hard}",
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось создать игру: {e}")
+
+    async def _write_game_result(
+        self, game_id: str, user_id: str, opponent_id: str, result: str
+    ):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{API_BASE_URL}/games/{game_id}/result",
+                    json={
+                        "user_uuid": user_id,
+                        "opponent_uuid": opponent_id,
+                        "result": result,
+                    },
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось добавить результат: {e}")
+
+    async def _update_game(self, game_id: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.patch(
+                    f"{API_BASE_URL}/games/{game_id}",
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось обновить игру: {e}")
+
+    async def _delete_game(self, game_id: str):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.delete(
+                    f"{API_BASE_URL}/games/{game_id}",
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"[ERROR] Не удалось удалить игру: {e}")
+
+    # Ходы
     async def handle_game_start(self, user_id: str, room_id: str):
         if room_id not in self.ready_votes:
             self.ready_votes[room_id] = set()
@@ -149,6 +201,8 @@ class ConnectionManager:
         await self._send(player_2, {"method": "ready_vote", "votes": votes_count})
 
         if votes_count >= 2:
+            game_uuid = str(uuid4())
+            self._room_and_game_data[room_id] = game_uuid
             self.ready_votes[room_id] = set()
             empty_field = [""] * 9
 
@@ -171,13 +225,18 @@ class ConnectionManager:
                 },
             )
 
-    async def handle_move(self, user_id: str, data: Dict[str, str | int]):
+            await self._add_game(
+                room_id=room_id, game_id=game_uuid, is_hard=self.is_difficult
+            )
+
+    async def handle_move(self, user_id: str, data: Dict[str, str | int], room_id: str):
         opponent_id = self.opponents.get(user_id)
         if not opponent_id:
             return
 
         field = data.get("field", [])
         symbol = data.get("symbol")
+        game_id = self._room_and_game_data[room_id]
 
         if self._check_winner(field):  # type: ignore
             result_message = {
@@ -189,6 +248,14 @@ class ConnectionManager:
             await self._send(opponent_id, result_message)
             await self._update_user_stats(user_id, "wins")
             await self._update_user_stats(opponent_id, "losses")
+
+            await self._update_game(game_id)
+            await self._write_game_result(
+                game_id=game_id, user_id=user_id, opponent_id=opponent_id, result="win"
+            )
+            await self._write_game_result(
+                game_id=game_id, user_id=opponent_id, opponent_id=user_id, result="lose"
+            )
 
             return
 
@@ -203,6 +270,14 @@ class ConnectionManager:
             await self._send(opponent_id, draw_message)
             await self._update_user_stats(user_id, "draws")
             await self._update_user_stats(opponent_id, "draws")
+
+            await self._update_game(game_id)
+            await self._write_game_result(
+                game_id=game_id, user_id=user_id, opponent_id=opponent_id, result="draw"
+            )
+            await self._write_game_result(
+                game_id=game_id, user_id=opponent_id, opponent_id=user_id, result="draw"
+            )
 
             return
 
