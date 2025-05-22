@@ -1,6 +1,6 @@
 from .user import UserEnter, FullUser, UpdateStats
 from .message import ServiceMessage
-from .room import CreateRoom, AddMember, WriteResult
+from .room import CreateRoom, AddMember, WriteResult, GameResultOut
 
 __all__ = [
     "UserEnter",
@@ -10,4 +10,5 @@ __all__ = [
     "AddMember",
     "UpdateStats",
     "WriteResult",
+    "GameResultOut",
 ]

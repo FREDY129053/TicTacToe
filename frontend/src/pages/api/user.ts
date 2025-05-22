@@ -17,6 +17,13 @@ export interface Stats {
   games_played: number
 }
 
+export interface GameResult {
+  result: string
+  opponent_avatar: string
+  opponent_username: string
+  game_duration_seconds: number
+}
+
 export async function getUserById(userId: string): Promise<FullUser> {
   const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
     method: "GET",
@@ -64,4 +71,22 @@ export async function getOpponent(roomId: string): Promise<IUserAtRoomData | nul
   }
 
   return await res.json()
+}
+
+export async function getGames(): Promise<GameResult[]> {
+  const res = await fetch(`http://localhost:8080/api/rooms/games_log`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+    },
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    throw new Error(`Ошибка при игр пользователя: ${res.statusText}`);
+  }
+
+  const games: GameResult[] = await res.json()
+
+  return games
 }

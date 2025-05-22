@@ -17,7 +17,7 @@ class ConnectionManager:
         self.opponents: Dict[str, str] = {}
         self.rooms: Dict[str, List[str]] = {}
         self.is_difficult: bool = False
-        self._room_and_game_data: Dict[str, str] = {}
+        self._room_and_game_data: Dict[str, Dict[str, bool]] = {}
 
     async def connect(
         self, websocket: WebSocket, room_id: str, user_id: str, difficult: bool
@@ -52,9 +52,12 @@ class ConnectionManager:
                 if user_id in room:
                     room.remove(user_id)
                     asyncio.create_task(self._remove_user_from_room(user_id, room_id))
-                    asyncio.create_task(
-                        self._delete_game(self._room_and_game_data[room_id])
-                    )
+
+                    game_data = self._room_and_game_data[room_id]
+                    if next(iter(game_data.values())):
+                        asyncio.create_task(
+                            self._delete_game(next(iter(game_data.keys())))
+                        )
 
     async def _match_clients(self, user_id: str, room_id: str):
         if room_id not in self.rooms:
@@ -202,7 +205,7 @@ class ConnectionManager:
 
         if votes_count >= 2:
             game_uuid = str(uuid4())
-            self._room_and_game_data[room_id] = game_uuid
+            self._room_and_game_data[room_id] = {game_uuid: True}
             self.ready_votes[room_id] = set()
             empty_field = [""] * 9
 
@@ -236,7 +239,8 @@ class ConnectionManager:
 
         field = data.get("field", [])
         symbol = data.get("symbol")
-        game_id = self._room_and_game_data[room_id]
+        game_data = self._room_and_game_data[room_id]
+        game_id = next(iter(game_data.keys()))
 
         if self._check_winner(field):  # type: ignore
             result_message = {
@@ -244,6 +248,7 @@ class ConnectionManager:
                 "field": field,
                 "symbol": symbol,
             }
+            self._room_and_game_data[room_id][game_id] = False
             await self._send(user_id, result_message)
             await self._send(opponent_id, result_message)
             await self._update_user_stats(user_id, "wins")
@@ -266,6 +271,7 @@ class ConnectionManager:
                 "field": field,
                 "symbol": None,
             }
+            self._room_and_game_data[room_id][game_id] = False
             await self._send(user_id, draw_message)
             await self._send(opponent_id, draw_message)
             await self._update_user_stats(user_id, "draws")

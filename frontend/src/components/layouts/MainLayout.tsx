@@ -17,6 +17,14 @@ export default function MainLayout({
 
     getUserById(uuid).then(setUser).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("meUsername", user.username);
+      localStorage.setItem("meAvatar", user.avatar_url);
+    }
+  }, [user]);
+
   return (
     <div className="h-screen flex bg-[linear-gradient(180deg,#4e54c8_0%,#6e72d9_100%)] overflow-hidden">
       <Sidebar username={user?.username} avatar={user?.avatar_url} />

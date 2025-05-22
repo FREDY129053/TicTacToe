@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Any, List
 from uuid import UUID
+from math import ceil
 from tortoise.functions import Count
 from backend.api.src.db.models import Room, RoomMember, User, Game, GameResult
 
@@ -112,3 +113,27 @@ async def delete_game(uuid: UUID):
     game = await Game.get(id=uuid)
 
     return await game.delete()
+
+
+async def get_all_user_games(user_uuid: str):
+    results = (
+        await GameResult.all()
+        .filter(user_id=user_uuid)
+        .prefetch_related("opponent", "game")
+        .order_by("-game__ended_at")
+    )
+    data = []
+
+    for i in results:
+        game_duration = i.game.ended_at - i.game.started_at
+
+        data.append(
+            {
+                "result": i.result.value,
+                "opponent_avatar": i.opponent.avatar_url,
+                "opponent_username": i.opponent.username,
+                "game_duration_seconds": ceil(game_duration.total_seconds()),
+            }
+        )
+
+    return data

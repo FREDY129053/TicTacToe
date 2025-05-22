@@ -80,3 +80,10 @@ async def delete_game(uuid: UUID) -> ServiceMessage:
     await RoomRepo.delete_game(uuid)
 
     return ServiceMessage(message="game deleted", status_code=200)
+
+
+async def get_all_results(token: str) -> ServiceMessage:
+    user_uuid = decode_jwt_token(token)
+    results = await RoomRepo.get_all_user_games(user_uuid.get("uuid", ""))
+
+    return ServiceMessage(message=results, status_code=200)
