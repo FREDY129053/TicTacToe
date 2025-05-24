@@ -5,8 +5,10 @@ import { decodeJWT } from "@/functions/decodeJWT";
 
 export default function MainLayout({
   children,
+  isBot = false
 }: {
   children: React.ReactNode;
+  isBot?: boolean
 }) {
   const [user, setUser] = useState<FullUser | null>(null);
 
@@ -28,7 +30,7 @@ export default function MainLayout({
   return (
     <div className="h-screen flex bg-[linear-gradient(180deg,#4e54c8_0%,#6e72d9_100%)] overflow-hidden">
       <Sidebar username={user?.username} avatar={user?.avatar_url} />
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <main className={`flex-1 ${isBot ? "p-0" : "overflow-y-auto p-6" }`}>{children}</main>
     </div>
   );
 }

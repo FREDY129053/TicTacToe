@@ -2,7 +2,7 @@
 
 @theme inline {
   --color-enter-bg: #4e54c8;
-  --animate-fadein: fadeIn 0.5s ease-out forwards;
+  --animate-fadein: fadeIn 1s ease-out forwards;
   --color-dark-purple: #081a51;
   --color-light-white: rgba(255, 255, 255, 0.18);
 }

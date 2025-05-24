@@ -1,5 +1,6 @@
 import { LoginModal } from "@/components/LoginForm";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { ReactNode } from "react";
@@ -23,6 +24,7 @@ const FadeIn = ({ children, className = "", delay = 0 }: FadeInProps) => {
 
 export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
+  const router = useRouter()
 
   return (
     <div className="w-full h-screen relative flex items-center justify-center">
@@ -67,6 +69,7 @@ export default function Home() {
               <button
                 className="bg-[#7b81f1] hover:bg-[#9da1f9] text-white cursor-pointer rounded-2xl px-6 py-3 transition-colors duration-200"
                 type="button"
+                onClick={() => router.push('/bot')}
               >
                 Играть с ботом
               </button>

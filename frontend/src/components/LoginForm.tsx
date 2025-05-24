@@ -19,6 +19,14 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (username.length < 2) {
+      setError("Длина никнейма должна быть минимум 2 символа")
+      return
+    }
+    if (password.length < 3) {
+      setError("Длина пароля должна быть минимум 3 символа")
+      return
+    }
     setError("");
     setIsLoading(true);
     axios

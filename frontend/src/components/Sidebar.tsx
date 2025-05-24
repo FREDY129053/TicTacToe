@@ -69,21 +69,24 @@ export default function Sidebar({
       title: "Игра с ботом",
       icon: <FaRobot />,
       hover: "hover:bg-light-white",
+      to: "/bot",
       spacing: true,
+      isShow: path !== "/bot",
     },
     {
       title: "Выход",
       icon: <AiOutlineLogout />,
       hover: "hover:bg-red-400 hover:text-white",
       spacing: true,
+      onClick: () => {},
     },
   ];
 
   return (
     <div
-      className={`bg-[rgba(0,0,0,0.3)] h-screen ${open && "mr-2"} p-5 pt-8 ${
+      className={`bg-[rgba(0,0,0,0.3)] h-screen ${open && "mr-0"} p-5 pt-8 ${
         open ? "w-56" : "w-20"
-      } relative duration-300`}
+      } relative duration-300 z-10`}
     >
       <BsArrowLeftShort
         className={`bg-white border border-dark-purple text-dark-purple text-3xl rounded-full absolute -right-3.5 top-9 cursor-pointer ${

@@ -1,3 +1,4 @@
+import MainLayout from "@/components/layouts/MainLayout";
 import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
@@ -46,28 +47,40 @@ export default function GameRoom() {
   const [winComb, setWinComb] = useState<number[]>([]);
   const [isGameActive, setIsGameActive] = useState(true);
   const [message, setMessage] = useState("Ваш ход...");
+  const [isAuth, setIsAuth] = useState(false);
+  const [isEndGame, setIsEndGame] = useState(false);
 
   const humanPlayer = "X";
   const bot = "O";
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsAuth(false);
+    } else {
+      setIsAuth(true)
+    }
+
     if (isWinner(field, humanPlayer)) {
       setHasWinner(true);
       setWinComb(getWinComb(field, humanPlayer));
-      setMessage("Вы победили!")
+      setIsEndGame(true);
+      setMessage("Вы победили!");
       setIsGameActive(false);
       return;
     }
     if (isWinner(field, bot)) {
       setHasWinner(false);
       setWinComb(getWinComb(field, bot));
-      setMessage("Компьютер выиграл")
+      setIsEndGame(true);
+      setMessage("Компьютер выиграл");
       setIsGameActive(false);
       return;
     }
     if (emptyIndices(field).length === 0) {
       setHasWinner(false);
-      setMessage("Ничья")
+      setIsEndGame(true);
+      setMessage("Ничья");
       setIsGameActive(false);
       return;
     }
@@ -140,7 +153,7 @@ export default function GameRoom() {
           newField[best.index] = bot;
           setField(newField);
           setIsGameActive(true);
-          setMessage("Ваш ход...")
+          setMessage("Ваш ход...");
         }
       }, 600);
     }
@@ -155,38 +168,112 @@ export default function GameRoom() {
     setIsGameActive(false);
   };
 
-  return (
-    <div className="relative flex flex-col items-center gap-2 justify-center h-screen m-0 overflow-hidden bg-[#12bdac] px-4 sm:px-12">
-      {hasWinner && <Confetti width={width} height={height} run={hasWinner} />}
+  function handleRestart() {
+    setField(Array(9).fill(""));
+    setWinComb([]);
+    setHasWinner(false);
+    setIsGameActive(true);
+    setMessage("Ваш ход...");
+    setIsEndGame(false);
+  }
 
-      <div className="flex flex-col items-center justify-center gap-6 mt-4">
-        <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em]">
-          {message.endsWith(".") ? (
-            <div className="flex items-end gap-0.5">
-              <div className="leading-none">{message.slice(0, -3)}</div>
-              <div className="flex space-x-0.5">
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
+  return (
+    <>
+      {isAuth ? (
+        <MainLayout isBot={true}>
+          <div className="relative flex flex-col items-center gap-2 justify-center h-screen m-0 overflow-hidden bg-[#12bdac] px-4 sm:px-12">
+            {hasWinner && (
+              <Confetti width={width} height={height} run={hasWinner} />
+            )}
+
+            <div className="flex flex-col items-center justify-center gap-6 mt-4">
+              <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em]">
+                {message.endsWith(".") ? (
+                  <div className="flex items-end gap-0.5">
+                    <div className="leading-none">{message.slice(0, -3)}</div>
+                    <div className="flex space-x-0.5">
+                      <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
+                    </div>
+                  </div>
+                ) : (
+                  message
+                )}
+              </div>
+
+              <div className="board relative">
+                {field.map((val, index) => (
+                  <div
+                    key={index}
+                    onClick={() => makeMove(index)}
+                    className={`cell ${
+                      winComb.includes(index) ? "bg-red-300!" : ""
+                    } ${val}`}
+                  />
+                ))}
+
+                {isEndGame && (
+                  <div className="z-10 mt-6 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-90%]">
+                    <button
+                      onClick={handleRestart}
+                      className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
+                    >
+                      Заново
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          ) : (
-            message
+          </div>
+        </MainLayout>
+      ) : (
+        <div className="relative flex flex-col items-center gap-2 justify-center h-screen m-0 overflow-hidden bg-[#12bdac] px-4 sm:px-12">
+          {hasWinner && (
+            <Confetti width={width} height={height} run={hasWinner} />
           )}
-        </div>
 
-        <div className="board">
-          {field.map((val, index) => (
-            <div
-              key={index}
-              onClick={() => makeMove(index)}
-              className={`cell ${
-                winComb.includes(index) ? "bg-red-300!" : ""
-              } ${val}`}
-            />
-          ))}
+          <div className="flex flex-col items-center justify-center gap-6 mt-4">
+            <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em]">
+              {message.endsWith(".") ? (
+                <div className="flex items-end gap-0.5">
+                  <div className="leading-none">{message.slice(0, -3)}</div>
+                  <div className="flex space-x-0.5">
+                    <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
+                  </div>
+                </div>
+              ) : (
+                message
+              )}
+            </div>
+
+            <div className="board relative">
+              {field.map((val, index) => (
+                <div
+                  key={index}
+                  onClick={() => makeMove(index)}
+                  className={`cell ${
+                    winComb.includes(index) ? "bg-red-300!" : ""
+                  } ${val}`}
+                />
+              ))}
+
+              {isEndGame && (
+                  <div className="z-10 mt-6 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-90%]">
+                    <button
+                      onClick={handleRestart}
+                      className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
+                    >
+                      Заново
+                    </button>
+                  </div>
+                )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

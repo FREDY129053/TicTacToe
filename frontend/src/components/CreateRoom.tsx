@@ -124,6 +124,7 @@ export default function CreateRoomForm({ isOpen, onClose, onSubmit }: Props) {
 
           <button
             type="submit"
+            disabled={isLoading}
             className={`cursor-pointer mt-2 bg-[#ffce00] hover:bg-[#ffd836] text-[#1c1c1c] font-semibold rounded-2xl px-6 py-3 transition ${isLoading && "flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-[#ffe28c] disabled:text-[#9e9e9e]"}`}
           >
             {isLoading && <Loading className="!w-5 !h-5" isDark={true} />}

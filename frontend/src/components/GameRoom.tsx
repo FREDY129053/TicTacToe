@@ -1,7 +1,7 @@
 import { IUserAtRoomData } from "@/interfaces/IUser";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import Confetti from 'react-confetti'
+import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 
 interface IRoomProps {
@@ -15,9 +15,9 @@ interface IRoomProps {
   isShowMessage: boolean;
   me: IUserAtRoomData | null;
   opponent: IUserAtRoomData | null;
-  isWinner: boolean
-  isWaitingReady: boolean
-  winComb: number[]
+  isWinner: boolean;
+  isWaitingReady: boolean;
+  winComb: number[];
 }
 
 export default function GameRoom({
@@ -33,11 +33,11 @@ export default function GameRoom({
   opponent,
   isWinner,
   isWaitingReady,
-  winComb
+  winComb,
 }: IRoomProps) {
   const [dots, setDots] = useState("");
-  const {width, height} = useWindowSize()
-  console.log(winComb)
+  const { width, height } = useWindowSize();
+  console.log(winComb);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -126,7 +126,19 @@ export default function GameRoom({
       </div>
 
       <div className="flex flex-col items-center justify-center gap-6 mt-4">
-        <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em]">
+        <div className="board relative">
+          {field.map((val, index) => (
+            <div
+              key={index}
+              onClick={() => makeMove(index)}
+              className={`cell ${
+                winComb.includes(index) ? "bg-red-300!" : ""
+              } ${val}`}
+            />
+          ))}
+        </div>
+
+        <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em] absolute animate-fadein duration-500">
           {isShowMessage && message.endsWith(".") ? (
             <div className="flex items-end gap-0.5">
               <div className="leading-none">{message.slice(0, -3)}</div>
@@ -136,30 +148,24 @@ export default function GameRoom({
                 <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
               </div>
             </div>
-          ) : isShowMessage ? (message) : (<></>)}
-        </div>
+          ) : isShowMessage ? (
+            message
+          ) : (
+            <></>
+          )}
 
-        <div className="board">
-          {field.map((val, index) => (
-            <div
-              key={index}
-              onClick={() => makeMove(index)}
-              className={`cell ${winComb.includes(index) ? "bg-red-300!" : ""} ${val}`}
-            />
-          ))}
+          {isWaitingReady && (
+            <div className="mt-6">
+              <button
+                onClick={makeReady}
+                className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
+              >
+                Готов {readyVotes} / 2
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {isWaitingReady && (
-        <div className="mt-6">
-          <button
-            onClick={makeReady}
-            className="px-6 py-4 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
-          >
-            Готов {readyVotes} / 2
-          </button>
-        </div>
-      )}
     </div>
   );
 }
