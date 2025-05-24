@@ -6,6 +6,11 @@ from backend.websockets.router import websockets_router
 
 
 def create_app() -> FastAPI:
+    """Сборка итогового приложения
+
+    Returns:
+        FastAPI: готовое приложение с роутерами, CORS и т.д.
+    """
     _app = FastAPI(
         title="Tic-Tac-Toe Websockets API",
         docs_url="/docs",
