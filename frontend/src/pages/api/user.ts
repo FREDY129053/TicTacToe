@@ -90,3 +90,21 @@ export async function getGames(): Promise<GameResult[]> {
 
   return games
 }
+
+export async function logout(): Promise<boolean> {
+  const res = await fetch(`http://localhost:8080/api/users/logout`, {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+    },
+    credentials: "include"
+  });
+
+  if (!res.ok) {
+    throw new Error(`Ошибка при выходе: ${res.statusText}`);
+  }
+
+  const isLogout: boolean = await res.json()
+
+  return isLogout
+}

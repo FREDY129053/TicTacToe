@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
 import backend.api.src.services.user as UserService
@@ -26,6 +26,13 @@ async def login_user(user_data: UserEnter):
     response.set_cookie("user", str(message.message), httponly=True)
 
     return response
+
+
+@user_router.post("/logout")
+async def logout(response: Response):
+    """### Выход пользователя из акка (зачистка куков)"""
+    response.delete_cookie(key="user", path="/")
+    return True
 
 
 @user_router.get("", response_model=List[FullUser])

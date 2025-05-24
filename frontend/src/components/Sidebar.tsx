@@ -12,9 +12,11 @@ import { useRouter } from "next/router";
 export default function Sidebar({
   username,
   avatar,
+  onClick,
 }: {
   username: string | undefined;
   avatar: string | undefined;
+  onClick?: () => void
 }) {
   const [open, setOpen] = useState<boolean>(true);
   const [isReady, setIsReady] = useState(false);
@@ -78,7 +80,7 @@ export default function Sidebar({
       icon: <AiOutlineLogout />,
       hover: "hover:bg-red-400 hover:text-white",
       spacing: true,
-      onClick: () => {},
+      onClick: onClick,
     },
   ];
 
@@ -161,6 +163,7 @@ export default function Sidebar({
                   </Link>
                 ) : (
                   <li
+                    onClick={menu.onClick}
                     className={`text-[#cfd2ff] flex items-center transition-transform gap-x-4 cursor-pointer p-2 ${
                       menu.hover
                     } rounded-md ${menu.spacing ? "mt-7" : "mt-2"}`}
