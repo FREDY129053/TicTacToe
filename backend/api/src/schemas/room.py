@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from uuid import UUID
 from datetime import timedelta
+from uuid import UUID
+
+from pydantic import BaseModel
+
 from backend.api.src.enums import Result
 
 

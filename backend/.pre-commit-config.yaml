@@ -20,3 +20,12 @@ repos:
     -   id: flake8
         args:
           - --config=backend/setup.cfg
+
+-   repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+    -   id: isort
+        args:
+            - --profile=black
+            - --line-length=90
+            - --settings-path=backend/setup.cfg

@@ -1,4 +1,5 @@
 from uuid import UUID
+
 import backend.api.src.repository.user as UserRepo
 from backend.api.src.helpers import (
     AvatarGenerator,

@@ -1,12 +1,12 @@
-import random
-import hashlib
 import base64
-import requests
-
-from .constants import RAW_IMAGE_SIZE, RAW_IMAGE_HALF_SIZE, BACKGROUND_COLOR
-
+import hashlib
+import random
 from io import BytesIO
+
+import requests
 from PIL import Image, ImageOps
+
+from .constants import BACKGROUND_COLOR, RAW_IMAGE_HALF_SIZE, RAW_IMAGE_SIZE
 
 
 # Этот класс генерирует фотографии аватарок как на GitHub и грузит их на фри хост

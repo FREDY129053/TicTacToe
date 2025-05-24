@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
 from typing import List
 from uuid import UUID
+
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+
 import backend.api.src.services.user as UserService
-from backend.api.src.schemas import UserEnter, FullUser, UpdateStats
+from backend.api.src.schemas import FullUser, UpdateStats, UserEnter
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
 

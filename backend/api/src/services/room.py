@@ -1,7 +1,8 @@
-import backend.api.src.repository.room as RoomRepo
-from backend.api.src.schemas import CreateRoom, ServiceMessage, WriteResult
-from backend.api.src.helpers import decode_jwt_token
 from uuid import UUID
+
+import backend.api.src.repository.room as RoomRepo
+from backend.api.src.helpers import decode_jwt_token
+from backend.api.src.schemas import CreateRoom, ServiceMessage, WriteResult
 
 
 async def get_rooms_data() -> ServiceMessage:

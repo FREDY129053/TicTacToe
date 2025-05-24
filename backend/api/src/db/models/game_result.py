@@ -1,5 +1,6 @@
 from tortoise import fields
 from tortoise.models import Model
+
 from backend.api.src.enums import Result
 
 

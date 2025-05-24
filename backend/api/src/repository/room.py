@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
+from math import ceil
 from typing import Any, List
 from uuid import UUID
-from math import ceil
+
 from tortoise.functions import Count
-from backend.api.src.db.models import Room, RoomMember, User, Game, GameResult
+
+from backend.api.src.db.models import Game, GameResult, Room, RoomMember, User
 
 
 async def get_rooms() -> List[Any]:

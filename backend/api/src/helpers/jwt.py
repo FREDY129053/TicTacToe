@@ -1,7 +1,8 @@
 import os
-from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from typing import Dict, Union
+
+from jose import JWTError, jwt
 
 
 def create_jwt_token(data: Dict[str, str], expires_delta: int = None) -> str:

@@ -1,5 +1,7 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from .socket_manager import ConnectionManager
 
 websockets_router = APIRouter(prefix="/ws/game")
