@@ -12,6 +12,7 @@ user_router = APIRouter(prefix="/users", tags=["Users"])
 
 @user_router.post("/login")
 async def login_user(user_data: UserEnter):
+    """### Вход/регистрация пользователя. Если пользовател есть в базе, то вход, иначе регистрация"""
     message = await UserService.user_enter(
         username=user_data.username, password=user_data.password
     )
@@ -29,6 +30,7 @@ async def login_user(user_data: UserEnter):
 
 @user_router.get("", response_model=List[FullUser])
 async def get_all_users():
+    """### Получение всех пользователей в базе"""
     message = await UserService.get_users()
 
     return message.message
@@ -36,6 +38,7 @@ async def get_all_users():
 
 @user_router.get("/stats")
 async def get_stats(user_uuid: UUID):
+    """### Получение статистики игр пользователя"""
     message = await UserService.get_stats(user_uuid)
 
     return message.message
@@ -43,6 +46,7 @@ async def get_stats(user_uuid: UUID):
 
 @user_router.get("/{uuid}", response_model=FullUser)
 async def get_user(uuid: UUID):
+    """### Получение информации о пользователе"""
     message = await UserService.get_user_by_uuid(uuid=uuid)
 
     if message.is_error:
@@ -53,6 +57,7 @@ async def get_user(uuid: UUID):
 
 @user_router.patch("/update_stats")
 async def update_stats(data: UpdateStats):
+    """### Обновление статистики пользователя"""
     message = await UserService.update_stats(data)
 
     return JSONResponse(
