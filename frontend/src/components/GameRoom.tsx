@@ -138,14 +138,14 @@ export default function GameRoom({
           ))}
         </div>
 
-        <div className="text-xl md:text-2xl font-bold text-[#f2ebd3] uppercase text-center min-h-[2em] absolute animate-fadein duration-500">
+        <div className="text-xl md:text-2xl font-bold text-white uppercase text-center min-h-[2em] absolute animate-fadein duration-500">
           {isShowMessage && message.endsWith(".") ? (
             <div className="flex items-end gap-0.5">
               <div className="leading-none">{message.slice(0, -3)}</div>
               <div className="flex space-x-0.5">
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <div className="h-[6px] w-[6px] bg-[#f2ebd3] rounded-full animate-bounce" />
+                <div className="h-[6px] w-[6px] bg-white rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <div className="h-[6px] w-[6px] bg-white rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <div className="h-[6px] w-[6px] bg-white rounded-full animate-bounce" />
               </div>
             </div>
           ) : isShowMessage ? (
@@ -158,7 +158,7 @@ export default function GameRoom({
             <div className="mt-6">
               <button
                 onClick={makeReady}
-                className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
+                className="text-[#383535] font-normal px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
               >
                 Готов {readyVotes} / 2
               </button>

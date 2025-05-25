@@ -19,7 +19,7 @@ export default function Main() {
     };
 
     fetchRooms();
-    const interval = setInterval(fetchRooms, 3000);
+    const interval = setInterval(fetchRooms, 1000);
     return () => clearInterval(interval);
   }, []);
 

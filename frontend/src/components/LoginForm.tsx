@@ -106,7 +106,7 @@ export const LoginModal = ({ onClose }: LoginModalProps) => {
               />
             </span>
           </div>
-          <div className="min-h-[20px] flex items-center ml-2">
+          <div className="min-h-[5px] flex items-center ml-2">
             {error && (
               <span className="text-[#ff6b6b] text-sm leading-tight">
                 {error}

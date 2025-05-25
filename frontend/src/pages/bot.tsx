@@ -217,7 +217,7 @@ export default function GameRoom() {
                   <div className="z-10 mt-6 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-90%]">
                     <button
                       onClick={handleRestart}
-                      className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition"
+                      className="text-[#1c1c1c] px-4 py-2 border border-amber-300 bg-amber-200 rounded-lg cursor-pointer hover:bg-amber-300 transition animate-fadein duration-300"
                     >
                       Заново
                     </button>

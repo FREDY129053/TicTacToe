@@ -13,7 +13,7 @@ export default function MainLayout({
 }) {
   const [user, setUser] = useState<FullUser | null>(null);
   const [, setIsLogout] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -33,11 +33,11 @@ export default function MainLayout({
   const handleLogout = () => {
     logout().then(setIsLogout).catch(console.error);
     localStorage.clear();
-    router.push("/")
+    router.push("/");
   };
 
   return (
-    <div className="h-screen flex bg-[linear-gradient(180deg,#4e54c8_0%,#6e72d9_100%)] overflow-hidden">
+    <div className="h-screen flex bg-[linear-gradient(180deg,#4e54c8_0%,#6e72d9_100%)] overflow-hidden relative">
       <Sidebar
         username={user?.username}
         avatar={user?.avatar_url}

@@ -37,7 +37,7 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
     beforeDraw: (chart: any) => {
       const { width, height, ctx } = chart;
       ctx.restore();
-      ctx.font = `1.5rem sans-serif`;
+      ctx.font = `1.4rem sans-serif`;
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#a1a1aa";
 
@@ -73,7 +73,7 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
           },
         },
         backgroundColor: emptyColor,
-        titleColor: "#374151", // gray-700
+        titleColor: "#374151",
         bodyColor: "#374151",
         borderColor: "#fff",
         borderWidth: 1,
@@ -149,8 +149,8 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
   ];
 
   return (
-    <div className="flex flex-col items-center mt-2">
-      <div className="w-[300px]">
+    <div className="flex flex-col items-center gap-2 mt-2">
+      <div className="w-[200px] md:w-[300px]">
         {total === 0 ? (
           <Doughnut
             data={emptyData}
@@ -167,7 +167,7 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
       </div>
 
       {total > 0 && (
-        <div className="mt-4 w-full sm:w-auto">
+        <div className="mt-4 w-full sm:w-auto flex flex-col items-center md:flex-row">
           <ul className="flex flex-col gap-2 text-sm sm:flex-row sm:justify-center sm:gap-6">
             {legendItems.map((item, index) => (
               <li key={index} className="flex items-center gap-2">

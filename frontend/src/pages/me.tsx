@@ -47,7 +47,7 @@ export default function Me() {
           <Loading size="w-11 h-11" />
         </div>
       )}
-      <h2 className="text-xl md:text-3xl text-center text-white font-semibold mt-10">
+      <h2 className="text-xl md:text-3xl text-center text-white font-semibold mt-10 mb-6">
         История игр
       </h2>
       {!isLoading ? (
