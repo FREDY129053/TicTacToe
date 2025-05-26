@@ -4,7 +4,7 @@ import uvicorn
 def main():
     uvicorn.run(
         app="backend.websockets.server:app",
-        host="localhost",
+        host="0.0.0.0",
         port=8000,
     )
 

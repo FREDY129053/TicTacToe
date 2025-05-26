@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import httpx
 
-API_BASE_URL = "http://localhost:8080/api/rooms"
+API_BASE_URL = "http://main_api:8080/api/rooms"
 
 
 # Заросы по комнате
@@ -81,7 +81,7 @@ async def update_user_stats(user_id: str, type: str):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.patch(
-                "http://localhost:8080/api/users/update_stats",
+                "http://main_api:8080/api/users/update_stats",
                 json={"user_uuid": user_id, "stat_type": type},
             )
             response.raise_for_status()

@@ -17,8 +17,6 @@ from backend.websockets.helpers import (
     write_game_result,
 )
 
-API_BASE_URL = "http://localhost:8080/api/rooms"
-
 
 class ConnectionManager:
     """Менеджер действий для Websocket"""

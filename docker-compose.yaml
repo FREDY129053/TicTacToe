@@ -9,9 +9,36 @@ services:
     volumes:
       - ./backend/ttt_dump.sql:/docker-entrypoint-initdb.d/ttt_dump.sql
     ports:
-      - "5433:5432"
+      - "5432:5432"
     networks:
       - api_network
+
+  api:
+    container_name: main_api
+    build:
+      context: .
+      dockerfile: backend/dockerfile
+      target: api
+    depends_on:
+      - db
+    networks:
+      - api_network
+    ports:
+      - "8080:8080"
+
+  websockets:
+    container_name: websockets
+    build:
+      context: .
+      dockerfile: backend/dockerfile
+      target: websocket
+    depends_on:
+      - api
+    networks:
+      - api_network
+    ports:
+      - "8000:8000"
+
 
 networks:
   api_network:

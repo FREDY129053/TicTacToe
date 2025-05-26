@@ -3,7 +3,9 @@ from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 TORTOISE_ORM = {
-    "connections": {"default": "postgres://postgres:12345@localhost:5433/tic_tac_toe_db"},
+    "connections": {
+        "default": "postgres://postgres:12345@ttt_main_db:5432/tic_tac_toe_db"
+    },
     "apps": {
         "models": {
             "models": ["backend.api.src.db.models"],

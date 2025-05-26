@@ -1,0 +1,22 @@
+# Базовый образ с установленными зависимостями
+FROM python:3.12 AS base
+
+WORKDIR /app
+
+COPY backend/requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+# Сборка api
+FROM base AS api
+
+COPY . /app
+
+CMD ["python", "-m", "backend.api.main"]
+
+# Сборка сокетов
+FROM base AS websocket
+
+COPY . /app
+
+CMD ["python", "-m", "backend.websockets.main"]
