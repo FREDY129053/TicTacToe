@@ -5,7 +5,7 @@ export interface FullUser {
   username: string;
   password: string;
   avatar_url: string;
-  created_at: string; // или `Date`, если хочешь парсить
+  created_at: string;
 }
 
 export interface Stats {

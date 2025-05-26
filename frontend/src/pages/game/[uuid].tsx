@@ -95,7 +95,7 @@ export default function Game() {
     .catch(console.error);
 
     const ws = new WebSocket(
-      `ws://127.0.0.1:8000/ws/game/${uuid}?user_id=${userUUID}&is_hard=${isDifficult}`
+      `ws://localhost:8000/ws/game/${uuid}?user_id=${userUUID}&is_hard=${isDifficult}`
     );
 
     ws.onopen = () => {

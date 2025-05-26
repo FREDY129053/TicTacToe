@@ -39,6 +39,17 @@ services:
     ports:
       - "8000:8000"
 
+  frontend:
+    container_name: main_front
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    depends_on:
+      - websockets
+    networks:
+      - api_network
+    ports:
+      - "3000:3000"
 
 networks:
   api_network:
