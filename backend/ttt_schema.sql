@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.8
+-- Dumped from database version 16.9 (Debian 16.9-1.pgdg120+1)
 -- Dumped by pg_dump version 16.8
 
 SET statement_timeout = 0;
@@ -24,7 +24,6 @@ CREATE FUNCTION public.delete_room_if_empty() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-  -- Если больше нет участников в комнате, удаляем её
   IF NOT EXISTS (
     SELECT 1 FROM room_members WHERE room_id = OLD.room_id
   ) THEN
@@ -37,6 +36,22 @@ $$;
 
 ALTER FUNCTION public.delete_room_if_empty() OWNER TO postgres;
 
+--
+-- Name: update_total_games(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.update_total_games() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.games_played = NEW.wins + NEW.losses + NEW.draws;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_total_games() OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -46,6 +61,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.game_results (
+    id integer NOT NULL,
     game_id uuid NOT NULL,
     user_id uuid NOT NULL,
     opponent_id uuid,
@@ -57,14 +73,36 @@ CREATE TABLE public.game_results (
 ALTER TABLE public.game_results OWNER TO postgres;
 
 --
+-- Name: game_results_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.game_results_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.game_results_id_seq OWNER TO postgres;
+
+--
+-- Name: game_results_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.game_results_id_seq OWNED BY public.game_results.id;
+
+
+--
 -- Name: games; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.games (
     id uuid NOT NULL,
     room_id uuid,
-    started_at timestamp without time zone DEFAULT now(),
-    ended_at timestamp without time zone,
+    started_at timestamp with time zone DEFAULT now(),
+    ended_at timestamp with time zone,
     is_difficult boolean NOT NULL
 );
 
@@ -76,13 +114,36 @@ ALTER TABLE public.games OWNER TO postgres;
 --
 
 CREATE TABLE public.room_members (
+    id integer NOT NULL,
     room_id uuid NOT NULL,
     user_id uuid NOT NULL,
-    joined_at timestamp without time zone DEFAULT now()
+    joined_at timestamp with time zone DEFAULT now()
 );
 
 
 ALTER TABLE public.room_members OWNER TO postgres;
+
+--
+-- Name: room_members_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.room_members_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.room_members_id_seq OWNER TO postgres;
+
+--
+-- Name: room_members_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.room_members_id_seq OWNED BY public.room_members.id;
+
 
 --
 -- Name: rooms; Type: TABLE; Schema: public; Owner: postgres
@@ -92,7 +153,7 @@ CREATE TABLE public.rooms (
     id uuid NOT NULL,
     name character varying(150) NOT NULL,
     is_difficult boolean DEFAULT false NOT NULL,
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now()
 );
 
 
@@ -103,6 +164,7 @@ ALTER TABLE public.rooms OWNER TO postgres;
 --
 
 CREATE TABLE public.user_stats (
+    id integer NOT NULL,
     user_id uuid NOT NULL,
     games_played integer DEFAULT 0 NOT NULL,
     wins integer DEFAULT 0 NOT NULL,
@@ -112,6 +174,10 @@ CREATE TABLE public.user_stats (
 
 
 ALTER TABLE public.user_stats OWNER TO postgres;
+
+--
+-- Name: user_stats_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
 
 CREATE SEQUENCE public.user_stats_id_seq
     AS integer
@@ -125,12 +191,11 @@ CREATE SEQUENCE public.user_stats_id_seq
 ALTER SEQUENCE public.user_stats_id_seq OWNER TO postgres;
 
 --
--- Name: user_company_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: user_stats_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.user_stats_id_seq OWNED BY public.user_stats.id;
 
-ALTER TABLE ONLY public.user_stats ALTER COLUMN id SET DEFAULT nextval('public.user_stats_id_seq'::regclass);
 
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
@@ -141,11 +206,32 @@ CREATE TABLE public.users (
     username character varying(100) NOT NULL,
     password text NOT NULL,
     avatar_url text,
-    created_at timestamp without time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now()
 );
 
 
 ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- Name: game_results id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.game_results ALTER COLUMN id SET DEFAULT nextval('public.game_results_id_seq'::regclass);
+
+
+--
+-- Name: room_members id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.room_members ALTER COLUMN id SET DEFAULT nextval('public.room_members_id_seq'::regclass);
+
+
+--
+-- Name: user_stats id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_stats ALTER COLUMN id SET DEFAULT nextval('public.user_stats_id_seq'::regclass);
+
 
 --
 -- Name: game_results game_results_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
@@ -216,6 +302,13 @@ ALTER TABLE ONLY public.users
 --
 
 CREATE TRIGGER trigger_delete_room_if_empty AFTER DELETE ON public.room_members FOR EACH ROW EXECUTE FUNCTION public.delete_room_if_empty();
+
+
+--
+-- Name: user_stats trigger_update_total_games; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER trigger_update_total_games BEFORE INSERT OR UPDATE OF wins, losses, draws ON public.user_stats FOR EACH ROW EXECUTE FUNCTION public.update_total_games();
 
 
 --
