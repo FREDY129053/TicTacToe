@@ -44,12 +44,10 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
       const text = "ВСЕГО ИГР";
       const value = total.toString();
 
-      // Текст заголовка
       const textX = Math.round((width - ctx.measureText(text).width) / 2);
       const textY = height / 2 - 10;
       ctx.fillText(text, textX, textY);
 
-      // Текст числа
       ctx.font = `bold text-base sans-serif`;
       const valueX = Math.round((width - ctx.measureText(value).width) / 2);
       const valueY = height / 2 + 20;
@@ -108,12 +106,10 @@ export const PlayerStatsDonutChart: React.FC<Props> = ({ wins, losses, draws }) 
       const text = "ВСЕГО ИГР";
       const value = total.toString();
 
-      // Текст заголовка
       const textX = Math.round((width - ctx.measureText(text).width) / 2);
       const textY = height / 2 - 10;
       ctx.fillText(text, textX, textY);
 
-      // Текст числа
       ctx.font = `bold text-base sans-serif`;
       const valueX = Math.round((width - ctx.measureText(value).width) / 2);
       const valueY = height / 2 + 20;

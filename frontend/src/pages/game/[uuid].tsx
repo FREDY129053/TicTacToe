@@ -130,7 +130,7 @@ export default function Game() {
               setMessage(response?.symbol === symbolRef.current ? "Вы победили!" : "Вы проиграли");
             }
             setIsEndGame(true);
-          }, 300);
+          }, 100);
           setIsWinner(response?.symbol === symbolRef.current)
           setIsShowMessage(true);
           setWinComb(response.combination)

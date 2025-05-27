@@ -1,4 +1,3 @@
-// pages/main.tsx
 import CreateRoomForm from "@/components/CreateRoom";
 import RoomInfo from "@/components/RoomInfo";
 import React, { useEffect, useState } from "react";
