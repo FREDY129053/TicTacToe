@@ -160,7 +160,7 @@ export default function GameRoom() {
   }, [field, hasWinner, isGameActive]);
 
   const makeMove = (index: number) => {
-    if (!isGameActive) return;
+    if (!isGameActive || field[index] !== "") return;
 
     const newField = [...field];
     newField[index] = humanPlayer;
